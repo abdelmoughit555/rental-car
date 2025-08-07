@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -27,30 +27,112 @@ import {
     Phone,
     Mail,
     ArrowRight,
-    Play,
-    Clock,
-    Zap,
     Building2,
     CalendarDays,
-    CarFront,
     Key
 } from 'lucide-vue-next';
 
-defineProps({
-    canLogin: {
-        type: Boolean,
+const props = defineProps({
+    cities: {
+        type: Array,
+        default: () => [],
     },
-    canRegister: {
-        type: Boolean,
+    areas: {
+        type: Array,
+        default: () => [],
     },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
+});
+
+// Reactive data for location selection
+const selectedCity = ref(null);
+const selectedArea = ref(null);
+const selectedMake = ref(null);
+const selectedModel = ref(null);
+const pickupDate = ref('');
+const returnDate = ref('');
+
+const areaOptions = ref([])
+const modelOptions = ref([])
+
+// Car makes data
+const carMakes = [
+    { id: 'bmw', name: 'BMW' },
+    { id: 'mercedes', name: 'Mercedes-Benz' },
+    { id: 'audi', name: 'Audi' },
+    { id: 'volkswagen', name: 'Volkswagen' },
+    { id: 'toyota', name: 'Toyota' },
+    { id: 'honda', name: 'Honda' },
+    { id: 'ford', name: 'Ford' },
+    { id: 'nissan', name: 'Nissan' },
+    { id: 'hyundai', name: 'Hyundai' },
+    { id: 'kia', name: 'Kia' },
+    { id: 'peugeot', name: 'Peugeot' },
+    { id: 'renault', name: 'Renault' },
+    { id: 'citroen', name: 'Citroën' },
+    { id: 'fiat', name: 'Fiat' },
+    { id: 'volvo', name: 'Volvo' },
+    { id: 'skoda', name: 'Škoda' },
+    { id: 'seat', name: 'SEAT' },
+    { id: 'opel', name: 'Opel' },
+    { id: 'chevrolet', name: 'Chevrolet' },
+    { id: 'dacia', name: 'Dacia' }
+];
+
+// Car models data
+const carModels = {
+    bmw: [
+        { id: 'x5', name: 'X5' },
+        { id: 'x3', name: 'X3' },
+        { id: 'x1', name: 'X1' },
+        { id: '3-series', name: '3 Series' },
+        { id: '5-series', name: '5 Series' },
+        { id: '7-series', name: '7 Series' },
+        { id: 'i3', name: 'i3' },
+        { id: 'i8', name: 'i8' }
+    ],
+    mercedes: [
+        { id: 'c-class', name: 'C-Class' },
+        { id: 'e-class', name: 'E-Class' },
+        { id: 's-class', name: 'S-Class' },
+        { id: 'a-class', name: 'A-Class' },
+        { id: 'gla', name: 'GLA' },
+        { id: 'glc', name: 'GLC' },
+        { id: 'gle', name: 'GLE' },
+        { id: 'gls', name: 'GLS' }
+    ],
+    audi: [
+        { id: 'a3', name: 'A3' },
+        { id: 'a4', name: 'A4' },
+        { id: 'a6', name: 'A6' },
+        { id: 'q3', name: 'Q3' },
+        { id: 'q5', name: 'Q5' },
+        { id: 'q7', name: 'Q7' },
+        { id: 'tt', name: 'TT' },
+        { id: 'rs', name: 'RS' }
+    ],
+    toyota: [
+        { id: 'camry', name: 'Camry' },
+        { id: 'corolla', name: 'Corolla' },
+        { id: 'rav4', name: 'RAV4' },
+        { id: 'highlander', name: 'Highlander' },
+        { id: 'prius', name: 'Prius' },
+        { id: 'yaris', name: 'Yaris' }
+    ],
+    volkswagen: [
+        { id: 'golf', name: 'Golf' },
+        { id: 'passat', name: 'Passat' },
+        { id: 'tiguan', name: 'Tiguan' },
+        { id: 'touareg', name: 'Touareg' },
+        { id: 'polo', name: 'Polo' },
+        { id: 'jetta', name: 'Jetta' }
+    ]
+};
+
+watch(selectedCity, (newVal) => {
+    areaOptions.value = props.areas.filter(area => area.city_id === newVal).map(area => ({
+        id: area.id,
+        name: area.name,
+    }));
 });
 
 // Popular categories
@@ -213,26 +295,86 @@ const popularAgencies = [
                     
                     <!-- Search Form -->
                     <div class="mt-10 flex items-center justify-center gap-x-6">
-                        <div class="bg-card border rounded-xl p-6 shadow-lg max-w-2xl w-full">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2">Location</label>
-                                    <TextInput placeholder="Where do you need the car?" />
+                        <div class="bg-card border rounded-xl p-6 shadow-lg max-w-4xl w-full">
+                            <!-- First row: City, Area -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="relative">
+                                    <label class="block text-sm font-medium mb-2">City</label>
+                                    <SelectInput 
+                                        name="city"
+                                        id="city"
+                                        :items="[{
+                                            id: null,
+                                            name: 'Select a city',
+                                        }].concat(props.cities.map(city => ({
+                                            id: city.id,
+                                            name: city.name,
+                                        })))"
+                                        v-model="selectedCity"
+                                    />
                                 </div>
+                                <div class="relative">
+                                    <label class="block text-sm font-medium mb-2">Area (Optional)</label>
+                                    <SelectInput 
+                                        name="area"
+                                        id="area"
+                                        :items="[{
+                                            id: null,
+                                            name: 'Select an area',
+                                        }].concat(areaOptions)"
+                                        v-model="selectedArea"
+                                        :disabled="!selectedCity"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <!-- Second row: Make, Model -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div class="relative">
+                                    <label class="block text-sm font-medium mb-2">Make</label>
+                                    <SelectInput 
+                                        name="make"
+                                        id="make"
+                                        :items="[{
+                                            id: null,
+                                            name: 'Select a make',
+                                        }].concat(carMakes)"
+                                        v-model="selectedMake"
+                                    />
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-sm font-medium mb-2">Model</label>
+                                    <SelectInput 
+                                        name="model"
+                                        id="model"
+                                        :items="[{
+                                            id: null,
+                                            name: 'Select a model',
+                                        }].concat(modelOptions)"
+                                        v-model="selectedModel"
+                                        :disabled="!selectedMake"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <!-- Third row: Pickup, Return -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Pickup</label>
-                                    <DatePicker placeholder="When do you need it?" />
+                                    <DatePicker placeholder="When do you need it?" v-model="pickupDate" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Return</label>
-                                    <DatePicker placeholder="When do you return it?" />
+                                    <DatePicker placeholder="When do you return it?" v-model="returnDate" />
                                 </div>
-                                <div class="flex items-end">
-                                    <PrimaryButton class="w-full">
-                                        <Search class="mr-2 h-4 w-4" />
-                                        Search Cars
-                                    </PrimaryButton>
-                                </div>
+                            </div>
+                            
+                            <!-- Search button on its own line -->
+                            <div class="flex justify-center">
+                                <PrimaryButton class="px-12 py-3 text-lg">
+                                    <Search class="mr-2 h-5 w-5" />
+                                    Search Cars
+                                </PrimaryButton>
                             </div>
                         </div>
                     </div>
@@ -242,6 +384,67 @@ const popularAgencies = [
                             15,000+ Cars Available
                         </p>
                         <p class="text-sm text-muted-foreground">From 500+ verified agencies across Europe</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="py-16 sm:py-20 bg-muted/30">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Available Locations</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Find cars in cities across Morocco
+                    </p>
+                </div>
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <div class="bg-card border rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                                <MapPin class="h-6 w-6 text-primary-foreground" />
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-foreground">{{ cities.length }}</h3>
+                                <p class="text-sm text-muted-foreground">Cities Available</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-card border rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                                <Building2 class="h-6 w-6 text-primary-foreground" />
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-foreground">{{ areas.length }}</h3>
+                                <p class="text-sm text-muted-foreground">Areas Available</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-card border rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                                <Car class="h-6 w-6 text-primary-foreground" />
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-semibold text-foreground">15,000+</h3>
+                                <p class="text-sm text-muted-foreground">Cars Available</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sample Cities -->
+                <div class="mt-12">
+                    <h3 class="text-xl font-semibold text-center mb-6">Popular Cities</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div v-for="city in cities.slice(0, 12)" :key="city.id" class="text-center">
+                            <div class="bg-card border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <MapPin class="h-6 w-6 text-primary mx-auto mb-2" />
+                                <p class="text-sm font-medium text-foreground">{{ city.name }}</p>
+                                <p class="text-xs text-muted-foreground">{{ city.country }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
