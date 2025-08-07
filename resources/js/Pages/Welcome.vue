@@ -55,13 +55,13 @@ defineProps({
 
 // Popular categories
 const categories = [
-    { name: 'SUV', count: '2,847', icon: Car, color: 'bg-blue-500' },
-    { name: 'Family car', count: '1,923', icon: Car, color: 'bg-green-500' },
-    { name: 'Estate', count: '1,456', icon: Car, color: 'bg-purple-500' },
-    { name: 'City', count: '892', icon: Car, color: 'bg-orange-500' },
-    { name: 'Luxury', count: '654', icon: Car, color: 'bg-red-500' },
-    { name: 'Electric', count: '1,234', icon: Car, color: 'bg-indigo-500' },
-    { name: 'Sport', count: '567', icon: Car, color: 'bg-pink-500' }
+    { name: 'SUV', count: '2,847', icon: Car },
+    { name: 'Family car', count: '1,923', icon: Car },
+    { name: 'Estate', count: '1,456', icon: Car },
+    { name: 'City', count: '892', icon: Car },
+    { name: 'Luxury', count: '654', icon: Car },
+    { name: 'Electric', count: '1,234', icon: Car },
+    { name: 'Sport', count: '567', icon: Car }
 ];
 
 // Services
@@ -70,29 +70,25 @@ const services = [
         title: 'Flexible Booking',
         description: 'Book for hours, days, or weeks',
         subtitle: 'No long-term commitments required',
-        icon: CalendarDays,
-        gradient: 'from-blue-500 to-blue-600'
+        icon: CalendarDays
     },
     {
         title: 'Verified Agencies',
         description: 'All agencies are verified and insured',
         subtitle: 'Trusted partners across Europe',
-        icon: Building2,
-        gradient: 'from-green-500 to-green-600'
+        icon: Building2
     },
     {
         title: 'Instant Pickup',
         description: 'Pick up your car in minutes',
         subtitle: 'Digital keys and contactless pickup',
-        icon: Key,
-        gradient: 'from-purple-500 to-purple-600'
+        icon: Key
     },
     {
         title: '24/7 Support',
         description: 'Round-the-clock customer support',
         subtitle: 'Help whenever you need it',
-        icon: Shield,
-        gradient: 'from-orange-500 to-orange-600'
+        icon: Shield
     }
 ];
 
@@ -102,22 +98,19 @@ const steps = [
         number: '01',
         title: 'Search & Choose',
         description: 'Browse thousands of cars from verified agencies. Filter by make, model, location, and availability.',
-        image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=300&fit=crop',
-        gradient: 'from-blue-500 to-blue-600'
+        image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&h=300&fit=crop'
     },
     {
         number: '02',
         title: 'Book & Pay',
         description: 'Select your dates, review the car details, and book instantly with secure payment.',
-        image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop',
-        gradient: 'from-green-500 to-green-600'
+        image: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop'
     },
     {
         number: '03',
         title: 'Pickup & Drive',
         description: 'Pick up your car at the agency location or get it delivered to your doorstep.',
-        image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop',
-        gradient: 'from-purple-500 to-purple-600'
+        image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop'
     }
 ];
 
@@ -127,22 +120,19 @@ const trustFeatures = [
         icon: Shield,
         title: 'Fully Insured',
         subtitle: 'All rentals include comprehensive insurance',
-        description: 'Every booking comes with full insurance coverage. You\'re protected against accidents, theft, and damage. No hidden fees or surprises.',
-        gradient: 'from-green-500 to-green-600'
+        description: 'Every booking comes with full insurance coverage. You\'re protected against accidents, theft, and damage. No hidden fees or surprises.'
     },
     {
         icon: CheckCircle,
         title: 'Verified Agencies',
         subtitle: 'Only trusted partners',
-        description: 'All agencies on our platform are thoroughly verified. We check their licenses, insurance, and customer reviews to ensure quality service.',
-        gradient: 'from-blue-500 to-blue-600'
+        description: 'All agencies on our platform are thoroughly verified. We check their licenses, insurance, and customer reviews to ensure quality service.'
     },
     {
         icon: Award,
         title: 'Best Price Guarantee',
         subtitle: 'We match any competitor price',
-        description: 'Found a better price elsewhere? We\'ll match it! Our price guarantee ensures you always get the best deal on car rentals.',
-        gradient: 'from-purple-500 to-purple-600'
+        description: 'Found a better price elsewhere? We\'ll match it! Our price guarantee ensures you always get the best deal on car rentals.'
     }
 ];
 
@@ -209,379 +199,299 @@ const popularAgencies = [
 <template>
     <AppLayout title="Autorockin - Rent Cars from Trusted Agencies">
         <!-- Hero Section -->
-        <section class="relative min-h-[70vh] flex items-center bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 opacity-10">
-                <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-                <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-                <div class="absolute bottom-0 left-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
-            </div>
-            
-            <div class="container mx-auto px-4 relative z-10">
-                <div class="max-w-6xl mx-auto">
-                    <!-- Main Content -->
-                    <div class="text-center text-white mb-12">
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                            Rent cars from trusted agencies.<br>
-                            <span class="text-yellow-400">Like Airbnb, but for cars.</span>
-                        </h1>
-                        
-                        <p class="text-lg md:text-xl mb-8 text-gray-300 max-w-3xl mx-auto">
-                            Choose from 15,000+ cars across 500+ verified agencies in Europe. 
-                            Book with confidence - full insurance included.
-                        </p>
-
-                        <!-- Stats -->
-                        <div class="flex flex-wrap justify-center gap-8 mb-8">
-                            <div class="flex items-center space-x-2">
-                                <CheckCircle class="h-5 w-5 text-green-400" />
-                                <span class="text-sm font-medium">15,000+ cars available</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <CheckCircle class="h-5 w-5 text-green-400" />
-                                <span class="text-sm font-medium">500+ verified agencies</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <CheckCircle class="h-5 w-5 text-green-400" />
-                                <span class="text-sm font-medium">Full insurance included</span>
-                            </div>
-                        </div>
-                    </div>
-
+        <section class="relative overflow-hidden bg-background py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h1 class="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+                        Rent cars from trusted agencies.<br>
+                        <span class="text-primary">Like Airbnb, but for cars.</span>
+                    </h1>
+                    <p class="mt-6 text-lg leading-8 text-muted-foreground">
+                        Choose from 15,000+ cars across 500+ verified agencies in Europe. 
+                        Book with confidence - full insurance included.
+                    </p>
+                    
                     <!-- Search Form -->
-                    <div class="max-w-4xl mx-auto">
-                        <div class="bg-white rounded-2xl p-6 md:p-8 shadow-2xl">
-                            <div class="text-center mb-6">
-                                <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Car</h2>
-                                <p class="text-gray-600">Search from thousands of cars across Europe</p>
-                            </div>
-
+                    <div class="mt-10 flex items-center justify-center gap-x-6">
+                        <div class="bg-card border rounded-xl p-6 shadow-lg max-w-2xl w-full">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <!-- Location -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <MapPin class="h-4 w-4 inline mr-1" />
-                                        Location
-                                    </label>
-                                    <TextInput 
-                                        placeholder="Where do you need the car?" 
-                                        class="w-full"
-                                    />
+                                    <label class="block text-sm font-medium mb-2">Location</label>
+                                    <TextInput placeholder="Where do you need the car?" />
                                 </div>
-
-                                <!-- Pickup Date -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <Calendar class="h-4 w-4 inline mr-1" />
-                                        Pickup
-                                    </label>
-                                    <DatePicker 
-                                        placeholder="When do you need it?" 
-                                        class="w-full"
-                                    />
+                                    <label class="block text-sm font-medium mb-2">Pickup</label>
+                                    <DatePicker placeholder="When do you need it?" />
                                 </div>
-
-                                <!-- Return Date -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        <Calendar class="h-4 w-4 inline mr-1" />
-                                        Return
-                                    </label>
-                                    <DatePicker 
-                                        placeholder="When do you return it?" 
-                                        class="w-full"
-                                    />
+                                    <label class="block text-sm font-medium mb-2">Return</label>
+                                    <DatePicker placeholder="When do you return it?" />
                                 </div>
-
-                                <!-- Search Button -->
                                 <div class="flex items-end">
-                                    <PrimaryButton class="w-full py-3">
+                                    <PrimaryButton class="w-full">
                                         <Search class="mr-2 h-4 w-4" />
                                         Search Cars
                                     </PrimaryButton>
                                 </div>
                             </div>
-
-                            <!-- Quick Stats -->
-                            <div class="mt-6 pt-4 border-t border-gray-200">
-                                <div class="flex justify-between text-sm text-gray-600">
-                                    <span>15,000+ cars available</span>
-                                    <span>500+ agencies</span>
-                                    <span>Full insurance</span>
-                                </div>
-                            </div>
                         </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <p class="text-lg font-semibold text-primary">
+                            15,000+ Cars Available
+                        </p>
+                        <p class="text-sm text-muted-foreground">From 500+ verified agencies across Europe</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Trust Features Section -->
-        <section class="py-16 bg-gradient-to-br from-gray-50 to-white">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div v-for="feature in trustFeatures" :key="feature.title" class="text-center group">
-                        <div class="flex justify-center mb-4">
-                            <div class="p-4 bg-gradient-to-r rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300" :class="feature.gradient">
-                                <component :is="feature.icon" class="h-8 w-8 text-white" />
+        <section class="py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl lg:max-w-none">
+                    <div class="grid grid-cols-1 gap-x-8 gap-y-12 lg:grid-cols-3">
+                        <div v-for="feature in trustFeatures" :key="feature.title" class="flex flex-col">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                                <component :is="feature.icon" class="h-6 w-6 text-primary-foreground" />
+                            </div>
+                            <div class="mt-6">
+                                <h3 class="text-lg font-semibold text-foreground">{{ feature.title }}</h3>
+                                <p class="mt-2 text-base text-muted-foreground">{{ feature.description }}</p>
                             </div>
                         </div>
-                        <h3 class="text-xl font-semibold mb-2">{{ feature.title }}</h3>
-                        <p class="text-gray-600">{{ feature.description }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Featured Cars -->
-        <section class="py-16 bg-white">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-4">Featured Cars</h2>
-                    <p class="text-gray-600">Handpicked vehicles from top agencies</p>
+        <section class="py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Featured Cars</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Handpicked vehicles from top agencies
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div v-for="car in featuredCars" :key="car.name" 
-                         class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
-                        <div class="relative">
-                            <img :src="car.image" :alt="car.name" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <article v-for="car in featuredCars" :key="car.name" class="flex flex-col items-start">
+                        <div class="relative w-full">
+                            <img :src="car.image" :alt="car.name" class="aspect-[16/9] w-full rounded-2xl bg-muted object-cover sm:aspect-[2/1] lg:aspect-[3/2]" />
                             <Badge class="absolute top-4 left-4" :variant="car.badge === 'New' ? 'default' : car.badge === 'Popular' ? 'secondary' : 'outline'">
                                 {{ car.badge }}
                             </Badge>
-                            <div class="absolute top-4 right-4 flex items-center bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                            <div class="absolute top-4 right-4 flex items-center bg-background/90 backdrop-blur-sm rounded-full px-2 py-1">
                                 <Star class="h-4 w-4 text-yellow-500 fill-current" />
                                 <span class="text-sm font-medium ml-1">{{ car.rating }}</span>
                             </div>
                         </div>
-                        <div class="p-6">
-                            <h3 class="font-semibold text-lg mb-2">{{ car.name }}</h3>
-                            <p class="text-sm text-gray-600 mb-1">{{ car.agency }}</p>
-                            <p class="text-sm text-gray-500 mb-3 flex items-center">
-                                <MapPin class="h-4 w-4 mr-1" />
-                                {{ car.location }}
-                            </p>
-                            <div class="flex items-center justify-between mb-4">
-                                <p class="text-2xl font-bold text-blue-600">{{ car.price }}</p>
-                                <p class="text-sm text-gray-500">{{ car.reviews }} reviews</p>
+                        <div class="max-w-xl">
+                            <div class="mt-6 flex items-center gap-x-4 text-xs">
+                                <time class="text-muted-foreground">{{ car.agency }}</time>
+                                <span class="relative z-10 rounded-full bg-muted px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/80">
+                                    {{ car.location }}
+                                </span>
                             </div>
-                            <PrimaryButton class="w-full">
-                                Book Now
-                                <ArrowRight class="ml-2 h-4 w-4" />
-                            </PrimaryButton>
+                            <div class="group relative">
+                                <h3 class="mt-3 text-lg font-semibold leading-6 text-foreground group-hover:text-primary">
+                                    <span class="absolute inset-0"></span>
+                                    {{ car.name }}
+                                </h3>
+                                <p class="mt-5 line-clamp-3 text-sm leading-6 text-muted-foreground">{{ car.price }}</p>
+                            </div>
+                            <div class="relative mt-6 flex items-center gap-x-4">
+                                <PrimaryButton class="w-full">
+                                    Book Now
+                                    <ArrowRight class="ml-2 h-4 w-4" />
+                                </PrimaryButton>
+                            </div>
                         </div>
-                    </div>
+                    </article>
                 </div>
             </div>
         </section>
 
         <!-- Popular Agencies -->
-        <section class="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-4">Top Agencies</h2>
-                    <p class="text-gray-600">Trusted partners across Europe</p>
+        <section class="py-16 sm:py-20 bg-muted/30">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Top Agencies</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Trusted partners across Europe
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div v-for="agency in popularAgencies" :key="agency.name" 
-                         class="bg-white rounded-xl p-6 hover:shadow-lg transition-shadow duration-300 group">
-                        <div class="flex items-center mb-4">
-                            <img :src="agency.image" :alt="agency.name" class="w-16 h-16 rounded-lg object-cover mr-4" />
-                            <div>
-                                <h3 class="font-semibold text-lg">{{ agency.name }}</h3>
-                                <p class="text-sm text-gray-600">{{ agency.location }}</p>
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <div v-for="agency in popularAgencies" :key="agency.name" class="flex flex-col items-start">
+                        <div class="relative w-full">
+                            <img :src="agency.image" :alt="agency.name" class="aspect-[16/9] w-full rounded-2xl bg-muted object-cover sm:aspect-[2/1] lg:aspect-[3/2]" />
+                        </div>
+                        <div class="max-w-xl">
+                            <div class="mt-6 flex items-center gap-x-4 text-xs">
+                                <span class="relative z-10 rounded-full bg-muted px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/80">
+                                    {{ agency.location }}
+                                </span>
+                            </div>
+                            <div class="group relative">
+                                <h3 class="mt-3 text-lg font-semibold leading-6 text-foreground group-hover:text-primary">
+                                    <span class="absolute inset-0"></span>
+                                    {{ agency.name }}
+                                </h3>
+                                <p class="mt-5 line-clamp-3 text-sm leading-6 text-muted-foreground">{{ agency.cars }} cars available</p>
+                            </div>
+                            <div class="relative mt-6 flex items-center gap-x-4">
+                                <SecondaryButton class="w-full">
+                                    View Cars
+                                </SecondaryButton>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center">
-                                <Star class="h-4 w-4 text-yellow-500 fill-current mr-1" />
-                                <span class="text-sm font-medium">{{ agency.rating }}</span>
-                            </div>
-                            <span class="text-sm text-gray-600">{{ agency.cars }} cars</span>
-                        </div>
-                        <SecondaryButton class="w-full">
-                            View Cars
-                        </SecondaryButton>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Popular Categories -->
-        <section class="py-16 bg-white">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-4">Browse by Category</h2>
-                    <p class="text-gray-600">Find the perfect car for your needs</p>
+        <section class="py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Browse by Category</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Find the perfect car for your needs
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-7">
                     <div v-for="category in categories" :key="category.name" 
-                         class="bg-white rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1 border">
-                        <div class="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300" :class="category.color">
-                            <component :is="category.icon" class="h-6 w-6 text-white" />
+                         class="flex flex-col items-center text-center group cursor-pointer">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                            <component :is="category.icon" class="h-6 w-6 text-primary" />
                         </div>
-                        <h3 class="font-semibold mb-1">{{ category.name }}</h3>
-                        <p class="text-sm text-gray-600">{{ category.count }} cars</p>
+                        <h3 class="mt-4 text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{{ category.name }}</h3>
+                        <p class="mt-2 text-xs text-muted-foreground">{{ category.count }} cars</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- How it works -->
-        <section class="py-16 bg-gradient-to-br from-gray-50 to-white">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-4">How it works</h2>
-                    <p class="text-gray-600 max-w-2xl mx-auto">Rent a car in 3 simple steps</p>
+        <section class="py-16 sm:py-20 bg-muted/30">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">How it works</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Rent a car in 3 simple steps
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div v-for="step in steps" :key="step.number" class="text-center group">
-                        <div class="relative mb-6">
-                            <img :src="step.image" :alt="step.title" class="w-full h-48 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300" />
-                            <div class="absolute top-4 left-4 w-12 h-12 bg-gradient-to-r rounded-full flex items-center justify-center text-white font-bold text-lg" :class="step.gradient">
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+                    <div v-for="step in steps" :key="step.number" class="flex flex-col items-start">
+                        <div class="relative w-full">
+                            <img :src="step.image" :alt="step.title" class="aspect-[16/9] w-full rounded-2xl bg-muted object-cover sm:aspect-[2/1] lg:aspect-[3/2]" />
+                            <div class="absolute top-4 left-4 w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg">
                                 {{ step.number }}
                             </div>
                         </div>
-                        <h3 class="text-xl font-semibold mb-3">{{ step.title }}</h3>
-                        <p class="text-gray-600">{{ step.description }}</p>
+                        <div class="max-w-xl">
+                            <div class="group relative">
+                                <h3 class="mt-3 text-lg font-semibold leading-6 text-foreground group-hover:text-primary">
+                                    <span class="absolute inset-0"></span>
+                                    {{ step.title }}
+                                </h3>
+                                <p class="mt-5 line-clamp-3 text-sm leading-6 text-muted-foreground">{{ step.description }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Services Section -->
-        <section class="py-16 bg-white">
-            <div class="container mx-auto px-4">
-                <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold mb-4">Why choose Autorockin?</h2>
-                    <p class="text-lg text-gray-600">Everything you need for a perfect car rental experience</p>
+        <section class="py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Why choose Autorockin?</h2>
+                    <p class="mt-4 text-lg leading-8 text-muted-foreground">
+                        Everything you need for a perfect car rental experience
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div v-for="service in services" :key="service.title" 
-                         class="bg-white rounded-xl p-6 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 border">
-                        <div class="w-12 h-12 bg-gradient-to-r rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300" :class="service.gradient">
-                            <component :is="service.icon" class="h-6 w-6 text-white" />
+                <div class="mx-auto mt-12 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+                    <div v-for="service in services" :key="service.title" class="flex flex-col">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                            <component :is="service.icon" class="h-6 w-6 text-primary" />
                         </div>
-                        <h3 class="font-semibold mb-2">{{ service.title }}</h3>
-                        <p class="text-sm text-gray-600 mb-1">{{ service.description }}</p>
-                        <p class="text-xs text-gray-500">{{ service.subtitle }}</p>
-                    </div>
-                </div>
-
-                <!-- Additional services -->
-                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-xl p-6 shadow-lg border">
-                        <div class="flex items-center mb-4">
-                            <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
-                                <Shield class="h-5 w-5 text-white" />
-                            </div>
-                            <h3 class="font-semibold">Full Insurance</h3>
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold text-foreground">{{ service.title }}</h3>
+                            <p class="mt-2 text-base text-muted-foreground">{{ service.description }}</p>
+                            <p class="mt-2 text-sm text-muted-foreground">{{ service.subtitle }}</p>
                         </div>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li class="flex items-center">
-                                <CheckCircle class="h-4 w-4 text-green-500 mr-2" />
-                                Comprehensive coverage included
-                            </li>
-                            <li class="flex items-center">
-                                <CheckCircle class="h-4 w-4 text-green-500 mr-2" />
-                                No hidden fees or charges
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="bg-white rounded-xl p-6 shadow-lg border">
-                        <div class="flex items-center mb-4">
-                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
-                                <Clock class="h-5 w-5 text-white" />
-                            </div>
-                            <h3 class="font-semibold">24/7 Support</h3>
-                        </div>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li class="flex items-center">
-                                <CheckCircle class="h-4 w-4 text-green-500 mr-2" />
-                                Round-the-clock assistance
-                            </li>
-                            <li class="flex items-center">
-                                <CheckCircle class="h-4 w-4 text-green-500 mr-2" />
-                                Emergency roadside support
-                            </li>
-                        </ul>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA Section -->
-        <section class="py-16 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden">
-            <!-- Background decoration -->
-            <div class="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 right-0 w-80 h-80 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2"></div>
-            
-            <div class="container mx-auto px-4 text-center relative z-10">
-                <h2 class="text-3xl font-bold mb-4">Ready to rent your perfect car?</h2>
-                <p class="text-xl mb-8 text-yellow-300">15,000+ cars from 500+ agencies</p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <PrimaryButton variant="secondary" size="lg" class="bg-white text-blue-600 hover:bg-gray-100">
-                        Browse All Cars
-                        <ArrowRight class="ml-2 h-4 w-4" />
-                    </PrimaryButton>
-                    <SecondaryButton size="lg" class="border-white text-white hover:bg-white hover:text-blue-600">
-                        List Your Car
-                    </SecondaryButton>
+        <section class="py-16 sm:py-20 bg-primary">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">Ready to rent your perfect car?</h2>
+                    <p class="mt-4 text-lg leading-8 text-primary-foreground/80">
+                        15,000+ cars from 500+ agencies
+                    </p>
+                    <div class="mt-10 flex items-center justify-center gap-x-6">
+                        <PrimaryButton variant="secondary" size="lg">
+                            Browse All Cars
+                            <ArrowRight class="ml-2 h-4 w-4" />
+                        </PrimaryButton>
+                        <SecondaryButton size="lg" variant="outline">
+                            List Your Car
+                        </SecondaryButton>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section class="py-16 bg-white">
-            <div class="container mx-auto px-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="text-center md:text-left">
-                        <h3 class="text-2xl font-bold mb-4">Join thousands of happy renters</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                    <CheckCircle class="h-5 w-5 text-white" />
+        <section class="py-16 sm:py-20">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl lg:max-w-none">
+                    <div class="grid grid-cols-1 gap-x-8 gap-y-12 lg:grid-cols-2">
+                        <div class="flex flex-col">
+                            <h3 class="text-2xl font-bold tracking-tight text-foreground">Join thousands of happy renters</h3>
+                            <div class="mt-6 space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <CheckCircle class="h-5 w-5 text-green-500" />
+                                    <span class="font-medium text-foreground">Verified agencies only</span>
                                 </div>
-                                <span class="font-medium">Verified agencies only</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                    <Shield class="h-5 w-5 text-white" />
+                                <div class="flex items-center space-x-3">
+                                    <Shield class="h-5 w-5 text-blue-500" />
+                                    <span class="font-medium text-foreground">Full insurance included</span>
                                 </div>
-                                <span class="font-medium">Full insurance included</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <Award class="h-5 w-5 text-white" />
+                                <div class="flex items-center space-x-3">
+                                    <Award class="h-5 w-5 text-purple-500" />
+                                    <span class="font-medium text-foreground">Best price guarantee</span>
                                 </div>
-                                <span class="font-medium">Best price guarantee</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
-                        <h4 class="font-semibold mb-4 text-lg">Need help?</h4>
-                        <div class="space-y-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                                    <Phone class="h-5 w-5 text-white" />
+                        <div class="flex flex-col">
+                            <h4 class="text-lg font-semibold text-foreground mb-6">Need help?</h4>
+                            <div class="space-y-6">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Phone class="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-foreground">Call us</p>
+                                        <p class="text-sm text-muted-foreground">+420 246 034 700</p>
+                                        <p class="text-xs text-muted-foreground">24/7 support</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium">Call us</p>
-                                    <p class="text-sm text-gray-600">+420 246 034 700</p>
-                                    <p class="text-xs text-gray-500">24/7 support</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                    <Mail class="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                    <p class="font-medium">Email</p>
-                                    <p class="text-sm text-gray-600">support@autorockin.com</p>
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                        <Mail class="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-foreground">Email</p>
+                                        <p class="text-sm text-muted-foreground">support@autorockin.com</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
