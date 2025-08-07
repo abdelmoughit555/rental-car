@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@inertiajs/vue3": "^2.0",
+        "@tailwindcss/forms": "^0.5.7",
+        "@tailwindcss/typography": "^0.5.10",
+        "@vitejs/plugin-vue": "^5.0.0",
+        "autoprefixer": "^10.4.16",
+        "axios": "^1.8.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.32",
+        "tailwindcss": "^3.4.0",
+        "vite": "^5.0.0",
+        "vue": "^3.3.13"
+    },
+    "dependencies": {
+        "@heroicons/vue": "^2.2.0",
+        "@radix-icons/vue": "^1.0.0",
+        "@vuepic/vue-datepicker": "^11.0.2",
+        "@vueuse/core": "^12.8.2",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "embla-carousel-autoplay": "^8.6.0",
+        "embla-carousel-vue": "^8.6.0",
+        "evaporate": "^2.1.4",
+        "lodash": "^4.17.21",
+        "lucide-vue-next": "^0.475.0",
+        "moment": "^2.30.1",
+        "pinia": "^3.0.1",
+        "radix-vue": "^1.9.14",
+        "reka-ui": "^2.4.1",
+        "tailwind-merge": "^3.0.2",
+        "tailwindcss-animate": "^1.0.7",
+        "uuid": "^11.1.0",
+        "vaul-vue": "^0.2.1",
+        "vue": "^3.3.13"
+    }
+}
