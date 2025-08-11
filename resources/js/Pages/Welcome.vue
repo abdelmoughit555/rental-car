@@ -1,28 +1,18 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import SelectInput from '@/Components/SelectInput.vue';
 import DatePicker from '@/Components/DatePicker.vue';
 import Badge from '@/Components/Badge.vue';
-import Statbox from '@/Components/Statbox.vue';
 import { 
     Shield, 
-    Truck, 
-    CreditCard, 
-    Wrench, 
     CheckCircle, 
     Star,
     MapPin,
     Search,
-    Filter,
     Car,
-    Euro,
-    Calendar,
-    Users,
     Award,
     Phone,
     Mail,

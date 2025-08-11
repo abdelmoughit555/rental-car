@@ -13,10 +13,12 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/ui', function () {
-    return Inertia::render('UI');
-})->name('ui');
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+});
