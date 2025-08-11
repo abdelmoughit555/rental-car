@@ -9,7 +9,7 @@ use App\Models\Area;
 
 class ScrapeAvitoCitiesFromApi extends Command
 {
-    protected $signature = 'scrape:avito-api';
+    protected $signature = 'scrape:avito-cities';
     protected $description = 'Scrape real cities and areas from Avito.ma API and save to database';
 
     public function handle()
