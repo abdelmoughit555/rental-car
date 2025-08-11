@@ -7,6 +7,8 @@ use Inertia\Middleware;
 use Illuminate\Support\Facades\Cache;
 use App\Models\City;
 use App\Models\Area;
+use App\Models\Brands\CarModel;
+use App\Models\Brands\Make;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,6 +41,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'cities' => $this->fetchCities(),
             'areas' => $this->fetchAreas(),
+            'makes' => $this->fetchMakes(),
+            'models' => $this->fetchModels(),
         ];
     }
 
@@ -72,6 +76,30 @@ class HandleInertiaRequests extends Middleware
                     'city_id' => $area->city_id
                 ];
             });
+        });
+    }
+
+    /**
+     * Fetch makes with caching for 1 hour
+     */
+    public function fetchMakes()
+    {
+        return Cache::remember('makes', now()->addHour(), function () {
+            return Make::active()
+                ->orderByDesc('featured')
+                ->get(['id', 'name', 'slug']);
+        });
+    }
+
+    /**
+     * Fetch models with caching for 1 hour
+     */
+    public function fetchModels()
+    {
+        return Cache::remember('models', now()->addHour(), function () {
+            return CarModel::active()->with('make:id,name,slug')
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'make_id']);
         });
     }
 }

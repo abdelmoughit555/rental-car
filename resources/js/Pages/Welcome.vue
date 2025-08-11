@@ -41,98 +41,55 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    makes: {
+        type: Array,
+        default: () => [],
+    },
+    models: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 // Reactive data for location selection
-const selectedCity = ref(null);
-const selectedArea = ref(null);
-const selectedMake = ref(null);
-const selectedModel = ref(null);
-const pickupDate = ref('');
-const returnDate = ref('');
+const form = ref({
+    city: null,
+    area: null,
+    make: null,
+    model: null,
+    pickupDate: '',
+    returnDate: '',
+});
 
 const areaOptions = ref([])
 const modelOptions = ref([])
 
-// Car makes data
-const carMakes = [
-    { id: 'bmw', name: 'BMW' },
-    { id: 'mercedes', name: 'Mercedes-Benz' },
-    { id: 'audi', name: 'Audi' },
-    { id: 'volkswagen', name: 'Volkswagen' },
-    { id: 'toyota', name: 'Toyota' },
-    { id: 'honda', name: 'Honda' },
-    { id: 'ford', name: 'Ford' },
-    { id: 'nissan', name: 'Nissan' },
-    { id: 'hyundai', name: 'Hyundai' },
-    { id: 'kia', name: 'Kia' },
-    { id: 'peugeot', name: 'Peugeot' },
-    { id: 'renault', name: 'Renault' },
-    { id: 'citroen', name: 'Citroën' },
-    { id: 'fiat', name: 'Fiat' },
-    { id: 'volvo', name: 'Volvo' },
-    { id: 'skoda', name: 'Škoda' },
-    { id: 'seat', name: 'SEAT' },
-    { id: 'opel', name: 'Opel' },
-    { id: 'chevrolet', name: 'Chevrolet' },
-    { id: 'dacia', name: 'Dacia' }
-];
-
-// Car models data
-const carModels = {
-    bmw: [
-        { id: 'x5', name: 'X5' },
-        { id: 'x3', name: 'X3' },
-        { id: 'x1', name: 'X1' },
-        { id: '3-series', name: '3 Series' },
-        { id: '5-series', name: '5 Series' },
-        { id: '7-series', name: '7 Series' },
-        { id: 'i3', name: 'i3' },
-        { id: 'i8', name: 'i8' }
-    ],
-    mercedes: [
-        { id: 'c-class', name: 'C-Class' },
-        { id: 'e-class', name: 'E-Class' },
-        { id: 's-class', name: 'S-Class' },
-        { id: 'a-class', name: 'A-Class' },
-        { id: 'gla', name: 'GLA' },
-        { id: 'glc', name: 'GLC' },
-        { id: 'gle', name: 'GLE' },
-        { id: 'gls', name: 'GLS' }
-    ],
-    audi: [
-        { id: 'a3', name: 'A3' },
-        { id: 'a4', name: 'A4' },
-        { id: 'a6', name: 'A6' },
-        { id: 'q3', name: 'Q3' },
-        { id: 'q5', name: 'Q5' },
-        { id: 'q7', name: 'Q7' },
-        { id: 'tt', name: 'TT' },
-        { id: 'rs', name: 'RS' }
-    ],
-    toyota: [
-        { id: 'camry', name: 'Camry' },
-        { id: 'corolla', name: 'Corolla' },
-        { id: 'rav4', name: 'RAV4' },
-        { id: 'highlander', name: 'Highlander' },
-        { id: 'prius', name: 'Prius' },
-        { id: 'yaris', name: 'Yaris' }
-    ],
-    volkswagen: [
-        { id: 'golf', name: 'Golf' },
-        { id: 'passat', name: 'Passat' },
-        { id: 'tiguan', name: 'Tiguan' },
-        { id: 'touareg', name: 'Touareg' },
-        { id: 'polo', name: 'Polo' },
-        { id: 'jetta', name: 'Jetta' }
-    ]
-};
-
-watch(selectedCity, (newVal) => {
+watch(() => form.value.city, (newVal) => {
+    if (!newVal) {
+        areaOptions.value = [];
+        form.value.area = null;
+        return;
+    }
+    
     areaOptions.value = props.areas.filter(area => area.city_id === newVal).map(area => ({
         id: area.id,
         name: area.name,
     }));
+    form.value.area = null;
+});
+
+watch(() => form.value.make, (newVal) => {
+    if (!newVal) {
+        modelOptions.value = [];
+        form.value.model = null;
+        return;
+    }
+    
+    modelOptions.value = props.models.filter(model => model.make_id === newVal).map(model => ({
+        id: model.id,
+        name: model.name,
+    }));
+    form.value.model = null;
 });
 
 // Popular categories
@@ -310,7 +267,7 @@ const popularAgencies = [
                                             id: city.id,
                                             name: city.name,
                                         })))"
-                                        v-model="selectedCity"
+                                        v-model="form.city"
                                     />
                                 </div>
                                 <div class="relative">
@@ -322,8 +279,8 @@ const popularAgencies = [
                                             id: null,
                                             name: 'Select an area',
                                         }].concat(areaOptions)"
-                                        v-model="selectedArea"
-                                        :disabled="!selectedCity"
+                                        v-model="form.area"
+                                        :disabled="!form.city"
                                     />
                                 </div>
                             </div>
@@ -338,8 +295,8 @@ const popularAgencies = [
                                         :items="[{
                                             id: null,
                                             name: 'Select a make',
-                                        }].concat(carMakes)"
-                                        v-model="selectedMake"
+                                        }].concat(props.makes)"
+                                        v-model="form.make"
                                     />
                                 </div>
                                 <div class="relative">
@@ -351,8 +308,8 @@ const popularAgencies = [
                                             id: null,
                                             name: 'Select a model',
                                         }].concat(modelOptions)"
-                                        v-model="selectedModel"
-                                        :disabled="!selectedMake"
+                                        v-model="form.model"
+                                        :disabled="!form.make"
                                     />
                                 </div>
                             </div>
@@ -361,11 +318,11 @@ const popularAgencies = [
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Pickup</label>
-                                    <DatePicker placeholder="When do you need it?" v-model="pickupDate" />
+                                    <DatePicker placeholder="When do you need it?" v-model="form.pickupDate" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Return</label>
-                                    <DatePicker placeholder="When do you return it?" v-model="returnDate" />
+                                    <DatePicker placeholder="When do you return it?" v-model="form.returnDate" />
                                 </div>
                             </div>
                             
