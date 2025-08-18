@@ -1,15 +1,12 @@
 <?php
 
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\Cars\CarCreationController;
+use App\Http\Controllers\Cars\CarEditorController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
     ]);
 });
 
@@ -18,7 +15,11 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::prefix('cars')->group(function() {
+        Route::get('/create', [CarCreationController::class, 'index'])->name('cars.create');
+
+        Route::prefix('/{car}')->group(function() {
+            Route::get('/information', [CarEditorController::class, 'information'])->name('cars.car.information');
+        });
+    });
 });

@@ -7,6 +7,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { useForm } from '@inertiajs/vue3';
+import Toaster from '@/Components/shadcn/ui/toast/Toaster.vue';
 
 defineProps({
     title: String,
@@ -148,5 +149,8 @@ const logout = () => {
                 <slot />
             </main>
         </div>
+        
+        <!-- Toast notifications -->
+        <Toaster />
     </div>
 </template>

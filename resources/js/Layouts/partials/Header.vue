@@ -11,7 +11,7 @@ import DropdownMenuLabel from '@/Components/shadcn/ui/dropdown-menu/DropdownMenu
 import DropdownMenuSeparator from '@/Components/shadcn/ui/dropdown-menu/DropdownMenuSeparator.vue';
 import { DropdownMenuTrigger } from 'radix-vue';
 import Artwork from '@/Components/Artwork.vue';
-import LoginModal from '@/Layouts/Partials/LoginModal.vue';
+import LoginModal from './LoginModal.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { 
     User, 
@@ -22,6 +22,7 @@ import {
     LogOut,
     Settings
 } from 'lucide-vue-next';
+import CreateNew from './CreateNew.vue';
 
 const status = ref(false);
 
@@ -95,6 +96,9 @@ const logout = () => {
                             <ShoppingCart class="h-5 w-5" />
                         </button>
                         
+                        <div>
+                            <CreateNew />
+                        </div>
                         <!-- Conditional User Section -->
                         <div v-if="$page.props.auth.user">
                             <!-- Authenticated User Dropdown -->
