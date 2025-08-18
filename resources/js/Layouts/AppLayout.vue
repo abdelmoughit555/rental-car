@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import Header from './partials/Header.vue';
 import Footer from './partials/Footer.vue';
+import Toaster from '@/Components/shadcn/ui/toast/Toaster.vue';
 
 const props = defineProps({
     title: String,
@@ -17,12 +18,15 @@ const props = defineProps({
             <Header />
 
             <!-- Main content -->
-            <main>
+            <main class="p-4 md:p-8 pt-8">
                 <slot />
             </main>
 
             <!-- Footer -->
             <Footer />
         </div>
+        
+        <!-- Toast notifications -->
+        <Toaster />
     </div>
 </template>
