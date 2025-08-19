@@ -9,6 +9,8 @@ use App\Models\City;
 use App\Models\Area;
 use App\Models\Brands\CarModel;
 use App\Models\Brands\Make;
+use App\Models\Cars\FuelType;
+use App\Models\Cars\Gearbox;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -42,7 +44,9 @@ class HandleInertiaRequests extends Middleware
             'cities' => $this->fetchCities(),
             'areas' => $this->fetchAreas(),
             'makes' => $this->fetchMakes(),
-            'models' => $this->fetchModels(),
+            'carModels' => $this->fetchModels(),
+            'gearboxes' => $this->fetchGearboxes(),
+            'fuelTypes' => $this->fetchFuelTypes(),
         ];
     }
 
@@ -100,6 +104,23 @@ class HandleInertiaRequests extends Middleware
             return CarModel::active()->with('make:id,name,slug')
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug', 'make_id']);
+        });
+    }
+
+    /**
+     * Fetch gearboxes with caching for 1 hour
+     */
+    public function fetchGearboxes()
+    {
+        return Cache::remember('gearboxes', now()->addHour(), function () {
+            return Gearbox::get(['id', 'name']);
+        });
+    }
+
+    public function fetchFuelTypes()
+    {
+        return Cache::remember('fuel_types', now()->addHour(), function () {
+            return FuelType::get(['id', 'name']);
         });
     }
 }

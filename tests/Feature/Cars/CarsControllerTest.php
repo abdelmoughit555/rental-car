@@ -90,5 +90,4 @@ class CarsControllerTest extends TestCase
             'car'
         ]);
     }
-    
 }

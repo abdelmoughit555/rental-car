@@ -11,7 +11,7 @@ class CarsController extends Controller
 {
     public function store(CarCreationRequest $request)
     {
-        // Todo: add policy for creating a  car
+        // Todo: add policy for creating a car
         $car = Car::create(
             array_merge($request->validated(), 
             [

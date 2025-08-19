@@ -26,6 +26,7 @@ return new class extends Migration
             $table->timestamp('published_at')->nullable();
             $table->timestamp('hidden_at')->nullable();
             $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('brand_id')->nullable()->constrained('makes');
             $table->foreignId('car_model_id')->nullable()->constrained('car_models');
             $table->foreignId('fuel_type_id')->nullable()->constrained('fuel_types');
             $table->foreignId('gearbox_id')->nullable()->constrained('gearboxes');
