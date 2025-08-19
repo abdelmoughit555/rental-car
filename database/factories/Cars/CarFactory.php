@@ -5,7 +5,7 @@ namespace Database\Factories\Cars;
 use App\Models\User;
 use App\Models\Brands\CarModel;
 use App\Models\Cars\FuelType;
-use App\Models\Cars\GearBox;
+use App\Models\Cars\Gearbox;
 use App\Enums\Cars\CarStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -36,7 +36,7 @@ class CarFactory extends Factory
             'user_id' => User::factory(),
             'car_model_id' => CarModel::factory(),
             'fuel_type_id' => FuelType::factory(),
-            'gearbox_id' => GearBox::factory(),
+            'gearbox_id' => Gearbox::factory(),
         ];
     }
 

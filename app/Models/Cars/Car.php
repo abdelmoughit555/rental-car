@@ -6,7 +6,7 @@ use App\Enums\Cars\CarStatus;
 use App\Models\User;
 use App\Models\Brands\CarModel;
 use App\Models\Cars\FuelType;
-use App\Models\Cars\GearBox;
+use App\Models\Cars\Gearbox;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,6 +48,6 @@ class Car extends Model
 
     public function gearbox(): BelongsTo
     {
-        return $this->belongsTo(GearBox::class);
+        return $this->belongsTo(Gearbox::class);
     }
 }
