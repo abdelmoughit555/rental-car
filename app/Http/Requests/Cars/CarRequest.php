@@ -22,8 +22,8 @@ class CarRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'required', 'string', 'max:512'],
-            'description' => ['sometimes', 'required', 'string', 'max:512'],
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'description' => ['sometimes', 'required', 'string', 'max:1000'],
             'brand_id' => ['sometimes', 'required', 'exists:makes,id'],
             'car_model_id' => ['sometimes', 'required', 'exists:car_models,id'],
             'registration_number' => ['sometimes', 'required', 'string', 'max:255'],

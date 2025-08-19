@@ -66,8 +66,8 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $response = $this->putJson("/api/cars/{$car->id}", [
-            'title' => str_repeat('a', 513), // Exceeds max:512
-            'description' => str_repeat('a', 513) // Exceeds max:512
+            'title' => str_repeat('a', 256), // Exceeds max:512
+            'description' => str_repeat('a', 1001) // Exceeds max:512
         ]);
 
         $response->assertStatus(422);

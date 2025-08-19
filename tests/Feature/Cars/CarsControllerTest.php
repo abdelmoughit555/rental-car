@@ -46,7 +46,10 @@ class CarsControllerTest extends TestCase
     {
         $this->signIn();
         
-        $response = $this->postJson('/api/cars', []);
+        $response = $this->postJson('/api/cars', [
+            'title' => '',
+            'description' => ''
+        ]);
         
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['title', 'description']);
