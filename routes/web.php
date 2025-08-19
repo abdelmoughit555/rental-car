@@ -20,6 +20,7 @@ Route::middleware([
 
         Route::prefix('/{car}')->group(function() {
             Route::get('/information', [CarEditorController::class, 'information'])->name('cars.car.information');
+            Route::get('/availability', [CarEditorController::class, 'availability'])->name('cars.car.availability');
         });
     });
 });

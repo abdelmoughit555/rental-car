@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Cars\CarController;
 use App\Http\Controllers\Cars\CarsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -11,5 +12,10 @@ Route::get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('cars')->group(function () {
         Route::post('/', [CarsController::class, 'store'])->name('cars.store');
+
+
+        Route::prefix('{car}')->group(function() {
+            Route::put('/', [CarController::class, 'update'])->name('cars.update');
+        });
     });
 });

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests\Cars;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class CarCreationRequest extends FormRequest
+class CarCreationRequest extends CarRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +20,7 @@ class CarCreationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            ...parent::rules(),
         ];
     }
 }
