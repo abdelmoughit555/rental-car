@@ -226,4 +226,92 @@ class CarControllerTest extends TestCase
             'description' => 'Original Description'
         ]);
     }
+
+    public function test_car_update_validates_availability_dates_format()
+    {        
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'available_from' => 'invalid-date',
+            'available_to' => 'also-invalid'
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_from', 'available_to']);
+    }
+
+    public function test_car_update_validates_available_from_is_after_or_equal_today()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $yesterday = now()->subDay()->format('Y-m-d');
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'available_from' => $yesterday
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_from']);
+    }
+
+    public function test_car_update_validates_available_to_is_after_available_from()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $availableFrom = now()->addWeek()->format('Y-m-d');
+        $availableTo = now()->addDays(3)->format('Y-m-d'); // Before available_from
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'available_from' => $availableFrom,
+            'available_to' => $availableTo
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_to']);
+    }
+
+    public function test_car_update_validates_available_to_is_at_least_14_days_after_available_from()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $availableFrom = now()->addWeek()->format('Y-m-d');
+        $availableTo = now()->addDays(10)->format('Y-m-d'); // Less than 14 days
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'available_from' => $availableFrom,
+            'available_to' => $availableTo
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['available_to']);
+    }
+
+    public function test_car_update_accepts_valid_availability_dates()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $availableFrom = now()->addWeek()->format('Y-m-d');
+        $availableTo = now()->addWeeks(3)->format('Y-m-d'); // More than 14 days
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'available_from' => $availableFrom,
+            'available_to' => $availableTo
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'available_from' => $availableFrom,
+            'available_to' => $availableTo
+        ]);
+    }
 }

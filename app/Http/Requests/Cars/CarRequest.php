@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Cars;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
+
 
 class CarRequest extends FormRequest
 {
@@ -35,11 +38,38 @@ class CarRequest extends FormRequest
             'doors' => ['sometimes', 'required', 'integer', 'min:1', 'max:10'],
             'seats' => ['sometimes', 'required', 'integer', 'min:1', 'max:10'],
             'mileage_km' => ['sometimes', 'required', 'integer', 'min:0', 'max:1000000'],
+            'available_from' => ['sometimes','required','date','date_format:Y-m-d','after_or_equal:today'],
+            'available_to'   => ['sometimes','required','date','date_format:Y-m-d','after:available_from'],
         ];
     }
 
     public function handle()
     {
         return;
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if (! $this->filled('available_from') || ! $this->filled('available_to')) {
+                return;
+            }
+    
+            if ($validator->errors()->has('available_from') || $validator->errors()->has('available_to')) {
+                return;
+            }
+    
+            $from = Carbon::createFromFormat('Y-m-d', $this->input('available_from'))->startOfDay();
+            $to   = Carbon::createFromFormat('Y-m-d', $this->input('available_to'))->startOfDay();
+    
+            if ($from->diffInDays($to) < 14) {
+                $validator->errors()->add(
+                    'available_to', 'Available To must be at least 2 weeks (14 days) after Available From.'
+                );
+            }
+        });
     }
 }

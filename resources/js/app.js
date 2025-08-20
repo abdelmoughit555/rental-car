@@ -1,6 +1,9 @@
 import '../css/app.css';
 import './bootstrap';
 
+// Import DatePicker CSS globally to ensure consistent styling
+import '@vuepic/vue-datepicker/dist/main.css';
+
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';

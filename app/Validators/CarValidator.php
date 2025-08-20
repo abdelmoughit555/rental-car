@@ -96,6 +96,14 @@ class CarValidator implements ModelValidator
     {
         $errors = [];
 
+        if(!$car->available_from) {
+            $errors['available_from'][] = 'Available From is required';
+        }
+
+        if(!$car->available_to) {
+            $errors['available_to'][] = 'Available To is required';
+        }
+        
         if(count($errors) > 0) {
             $this->availabilityValid = false;
         }

@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DatePicker Global Styles */
+.dp__theme_dark {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.dp__theme_dark .dp__menu {
+    background-color: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+}
+
+.dp__theme_dark .dp__cell_inner {
+    color: hsl(var(--foreground)) !important;
+}
+
+.dp__theme_dark .dp__cell_inner:hover {
+    background-color: hsl(var(--accent)) !important;
+}
+
+.dp__theme_dark .dp__active_date {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+}
+
+.dp__theme_dark .dp__today {
+    border-color: hsl(var(--primary)) !important;
+}
+
+.dp__theme_dark .dp__time_input {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+}
+
+.dp__theme_dark .dp__time_input:focus {
+    border-color: hsl(var(--ring)) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2) !important;
+}
