@@ -32,6 +32,9 @@ class CarResource extends JsonResource
             'available_from' => $this->available_from,
             'available_to' => $this->available_to,
             'price_per_day' => $this->price_per_day,
+            'features' => $this->whenLoaded('features', function () {
+                return $this->features->pluck('id');
+            }),
         ];
     }
 }

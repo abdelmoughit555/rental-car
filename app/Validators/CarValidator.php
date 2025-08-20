@@ -3,6 +3,7 @@
 namespace App\Validators;
 
 use App\Contracts\ModelValidator;
+use App\Models\CarFeatures\FeatureCategory;
 use App\Models\Cars\Car;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class CarValidator implements ModelValidator
     protected bool $informationValid = true;
     protected bool $availabilityValid = true;
     protected bool $pricingValid = true;
+    protected bool $featuresValid = true;
 
     public function validate(Model $car)
     {
@@ -131,6 +133,38 @@ class CarValidator implements ModelValidator
         return [
             'id' => $car->id,
             'price' => $errors,
+            'valid' => count($errors) === 0
+        ];
+    }
+
+    public function featuresValidation(Car $car)
+    {
+        $errors = [];
+
+        if(count($errors) > 0) {
+            $this->featuresValid = false;
+        }
+
+        // at least each feature category should have at least one feature selected
+        $featureCategories = FeatureCategory::with('features')->get();
+
+        foreach($featureCategories as $category) {
+            if(count($category->features) > 0) {
+                // Get all feature IDs for this category
+                $categoryFeatureIds = $category->features->pluck('id')->toArray();
+                
+                // Check if car has at least one feature from this category
+                $hasFeatureFromCategory = $car->features->whereIn('id', $categoryFeatureIds)->count() > 0;
+                
+                if (!$hasFeatureFromCategory) {
+                    $errors[$category->id] = 'At least one feature should be selected for ' . $category->name;
+                }
+            }
+        }
+
+        return [    
+            'id' => $car->id,
+            'features' => $errors,
             'valid' => count($errors) === 0
         ];
     }

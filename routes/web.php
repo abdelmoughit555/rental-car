@@ -22,6 +22,7 @@ Route::middleware([
             Route::get('/information', [CarEditorController::class, 'information'])->name('cars.car.information');
             Route::get('/availability', [CarEditorController::class, 'availability'])->name('cars.car.availability');
             Route::get('/pricing', [CarEditorController::class, 'pricing'])->name('cars.car.pricing');
+            Route::get('/features', [CarEditorController::class, 'features'])->name('cars.car.features');
         });
     });
 });

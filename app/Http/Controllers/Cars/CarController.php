@@ -13,6 +13,8 @@ class CarController extends Controller
     public function update(CarRequest $request, Car $car)
     {
         $car->update($request->validated());
+
+        $request->handle();
         
         CarUpdated::dispatch($car->id);
 

@@ -11,6 +11,7 @@ use App\Models\Brands\CarModel;
 use App\Models\Brands\Make;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
+use App\Models\CarFeatures\FeatureCategory;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -47,6 +48,7 @@ class HandleInertiaRequests extends Middleware
             'carModels' => $this->fetchModels(),
             'gearboxes' => $this->fetchGearboxes(),
             'fuelTypes' => $this->fetchFuelTypes(),
+            'featureCategories' => $this->fetchFeatureCategories(),
         ];
     }
 
@@ -122,5 +124,10 @@ class HandleInertiaRequests extends Middleware
         return Cache::remember('fuel_types', now()->addHour(), function () {
             return FuelType::get(['id', 'name']);
         });
+    }
+
+    public function fetchFeatureCategories()
+    {
+        return FeatureCategory::with('features')->get();
     }
 }
