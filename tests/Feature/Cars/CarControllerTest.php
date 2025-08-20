@@ -310,8 +310,13 @@ class CarControllerTest extends TestCase
 
         $this->assertDatabaseHas('cars', [
             'id' => $car->id,
-            'available_from' => $availableFrom,
-            'available_to' => $availableTo
         ]);
+        
+        // Refresh the car model to get the updated values
+        $car->refresh();
+        
+        // Compare dates without time components
+        $this->assertEquals($availableFrom, $car->available_from->format('Y-m-d'));
+        $this->assertEquals($availableTo, $car->available_to->format('Y-m-d'));
     }
 }
