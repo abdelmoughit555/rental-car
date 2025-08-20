@@ -16,7 +16,7 @@ class Car extends Model
     /** @use HasFactory<\Database\Factories\Cars\CarFactory> */
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km', 'registration_number', 'status', 'published_at', 'hidden_at', 'user_id', 'brand_id', 'car_model_id', 'fuel_type_id', 'gearbox_id', 'available_from', 'available_to'
+    protected $fillable = ['title', 'description', 'year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km', 'registration_number', 'status', 'published_at', 'hidden_at', 'user_id', 'brand_id', 'car_model_id', 'fuel_type_id', 'gearbox_id', 'available_from', 'available_to', 'price_per_day'
     ];
 
     protected $casts = [
@@ -31,6 +31,7 @@ class Car extends Model
         'doors' => 'integer',
         'seats' => 'integer',
         'mileage_km' => 'integer',
+        'price_per_day' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

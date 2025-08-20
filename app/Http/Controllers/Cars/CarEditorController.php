@@ -26,4 +26,12 @@ class CarEditorController extends Controller
             'validation' => (new CarValidator)->availabilityValidation($car)
         ]);
     }
+
+    public function pricing(Car $car, Request $request)
+    {
+        return Inertia::render('Cars/Edit/Pricing', [
+            'car' => CarResource::make($car),
+            'validation' => (new CarValidator)->pricingValidation($car)
+        ]);
+    }
 }

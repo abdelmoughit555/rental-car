@@ -1,7 +1,8 @@
 <script setup>
 import EditCarLayout from '../Edit/EditCarLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import DatePicker from '@/Components/DatePicker.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
 import { useToast } from '@/Components/shadcn/ui/toast/use-toast';
 import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -22,11 +23,11 @@ const { toast } = useToast()
 
 const car = ref(props.car);
 
-const watchedFields = ['available_from', 'available_to']
+const watchedFields = ['price_per_day']
 
 const sectionErrors = computed(() => {
   if (!props.validation) return []
-  return watchedFields.flatMap(field => props.validation?.availability[field] || []) || []
+  return watchedFields.flatMap(field => props.validation?.price[field] || []) || []
 })
 
 const hasSectionError = computed(() => sectionErrors.value.length > 0)
@@ -36,8 +37,7 @@ const save = () => {
     loading.value = true
     
     return axios.put(`/api/cars/${props.car.id}`, {
-        available_from: car.value.available_from,
-        available_to: car.value.available_to,
+        price_per_day: car.value.price_per_day,
     }).then(({data}) => {
         loading.value = false
         toast({
@@ -46,7 +46,7 @@ const save = () => {
             variant: 'success',
         })
 
-        router.visit(`/cars/${car.value.id}/pricing`)
+        router.visit(`/cars/${car.value.id}/features`)
     }).catch((error) => {
         loading.value = false
         if (error.response.status === 422) {
@@ -57,15 +57,15 @@ const save = () => {
 </script>
 
 <template>
-    <EditCarLayout :title="`Car Availability - ${car.title}`" :currentStep="3">
+    <EditCarLayout :title="`Car Price - ${car.title}`" :currentStep="4">
         <template #content>
             <div class="space-y-4">
                 <Panel>
                     <template #title>
-                        Set your availability
+                        Set your price
                     </template>
                     <template #description>
-                        This is the date we will make your car available for bookings. We recommend you choose a date at least 2 weeks in the future to give you time to pitch your car to customers.
+                        This is the price you want to charge for your car.
                     </template>
                     <template #aside>
                         <ValidationInfo v-if="hasSectionError" :errors="sectionErrors"/>
@@ -73,38 +73,25 @@ const save = () => {
                     <template #content>
                         <div class="space-y-4">
                             <Alert type="info" show>
-                                <template #title>Availability Guidelines</template>
+                                <template #title>Price Guidelines</template>
                                 <template #message>
                                     <ul class="list-disc">
                                         <li>
-                                            Available From: Select the date you want to make your car available.
+                                            Price per day: Set the price you want to charge for your car.
                                         </li>
                                         <li>
-                                            Available To: Select the date you want to make your car unavailable.
+                                            Price per day must be a number.
                                         </li>
                                         <li>
-                                            Available From must be before Available To.
-                                        </li>
-                                        <li>
-                                            Available From and Available To must be at least 2 weeks in the future.
+                                            Price per day must be greater than 0.
                                         </li>
                                     </ul>
                                 </template>
                             </Alert>
-                            <DatePicker class="w-full" v-model="car.available_from" placeholder="Select when you want to make your car available"
-                            :errors="errors.available_from"
-                            :hasError="errors.available_from != null">
-                                <template #label>
-                                    Available From
-                                </template>
-                            </DatePicker>
-                            <DatePicker class="w-full" v-model="car.available_to" placeholder="Select when you want to make your car unavailable"
-                            :errors="errors.available_to"
-                            :hasError="errors.available_to != null">
-                                <template #label>
-                                    Available To
-                                </template>
-                            </DatePicker>
+                            <div>
+                                <InputLabel for="price_per_day">Price per day (MAD)</InputLabel>
+                                <TextInput type="number" step="0.01" min="0.01" :hasError="errors.price_per_day && errors.price_per_day.length != 0" :errors="errors.price_per_day" v-model="car.price_per_day" class="mt-2" name="price_per_day" id="price_per_day" label="Price for the Car (MAD)" placeholder="Enter price per day for the car (MAD)..."/>
+                            </div>
                         </div>
                     </template>
                 </Panel>
@@ -112,7 +99,7 @@ const save = () => {
         </template>
         <template #footer>
             <PrimaryButton :loading="loading" @click="save">
-                Set up Price
+                Set up Features
             </PrimaryButton>
         </template>
     </EditCarLayout>
