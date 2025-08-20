@@ -10,6 +10,7 @@ class CarValidator implements ModelValidator
 {
     protected bool $informationValid = true;
     protected bool $availabilityValid = true;
+    protected bool $pricingValid = true;
 
     public function validate(Model $car)
     {
@@ -113,6 +114,24 @@ class CarValidator implements ModelValidator
             'availability' => $errors,
             'valid' => count($errors) === 0
         ];
+    }
 
+    public function pricingValidation(Car $car)
+    {
+        $errors = [];
+
+        if(!$car->price_per_day) {
+            $errors['price_per_day'][] = 'Price per day is required';
+        }
+
+        if(count($errors) > 0) {
+            $this->pricingValid = false;
+        }
+
+        return [
+            'id' => $car->id,
+            'price' => $errors,
+            'valid' => count($errors) === 0
+        ];
     }
 }

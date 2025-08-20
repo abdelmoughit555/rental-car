@@ -40,6 +40,7 @@ class CarRequest extends FormRequest
             'mileage_km' => ['sometimes', 'required', 'integer', 'min:0', 'max:1000000'],
             'available_from' => ['sometimes','required','date','date_format:Y-m-d','after_or_equal:today'],
             'available_to'   => ['sometimes','required','date','date_format:Y-m-d','after:available_from'],
+            'price_per_day' => ['sometimes', 'required', 'numeric', 'min:0.01', 'max:999999.99'],
         ];
     }
 

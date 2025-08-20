@@ -85,11 +85,12 @@ class CarControllerTest extends TestCase
             'power_hp' => 'invalid',
             'doors' => 'invalid',
             'seats' => 'invalid',
-            'mileage_km' => 'invalid'
+            'mileage_km' => 'invalid',
+            'price_per_day' => 'invalid-price'
         ]);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km']);
+        $response->assertJsonValidationErrors(['year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km', 'price_per_day']);
     }
 
     public function test_car_update_validates_field_ranges()
@@ -103,11 +104,12 @@ class CarControllerTest extends TestCase
             'power_hp' => 99, // Below min:100
             'doors' => 0, // Below min:1
             'seats' => 0, // Below min:1
-            'mileage_km' => -1 // Below min:0
+            'mileage_km' => -1, // Below min:0
+            'price_per_day' => 0.00 // Below min:0.01
         ]);
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km']);
+        $response->assertJsonValidationErrors(['year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km', 'price_per_day']);
     }
 
     public function test_car_update_validates_foreign_key_constraints()
@@ -312,11 +314,178 @@ class CarControllerTest extends TestCase
             'id' => $car->id,
         ]);
         
-        // Refresh the car model to get the updated values
         $car->refresh();
         
-        // Compare dates without time components
         $this->assertEquals($availableFrom, $car->available_from->format('Y-m-d'));
         $this->assertEquals($availableTo, $car->available_to->format('Y-m-d'));
+    }
+
+    public function test_car_update_validates_price_per_day_is_required_when_provided()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => ''
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['price_per_day']);
+    }
+
+    public function test_car_update_validates_price_per_day_is_numeric()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => 'not-a-number'
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['price_per_day']);
+    }
+
+    public function test_car_update_validates_price_per_day_minimum_value()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => 0.00
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['price_per_day']);
+    }
+
+    public function test_car_update_validates_price_per_day_maximum_value()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => 1000000.00
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['price_per_day']);
+    }
+
+    public function test_car_update_accepts_valid_price_per_day()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $validPrice = 199.99;
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => $validPrice
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+        ]);
+
+        $this->assertEquals($validPrice, $car->fresh()->price_per_day);
+    }
+
+    public function test_car_update_accepts_decimal_price_per_day()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $decimalPrice = 150.50;
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => $decimalPrice
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+        ]);
+        
+        $this->assertEquals($decimalPrice, $car->fresh()->price_per_day);
+    }
+
+    public function test_car_update_accepts_minimum_valid_price_per_day()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $minPrice = 0.01;
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => $minPrice
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+        ]);
+
+        $this->assertEquals($minPrice, $car->fresh()->price_per_day);
+    }
+
+    public function test_car_update_accepts_maximum_valid_price_per_day()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $maxPrice = 999999.99;
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'price_per_day' => $maxPrice
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+        ]);
+
+        $this->assertEquals($maxPrice, $car->fresh()->price_per_day);
+    }
+
+    public function test_car_update_price_per_day_with_other_fields()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'title' => 'Updated Title',
+            'price_per_day' => 250.00,
+            'description' => 'Updated Description'
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'title' => 'Updated Title',
+            'description' => 'Updated Description'
+        ]);
+        
+        $this->assertEquals(250.00, $car->fresh()->price_per_day);
     }
 }
