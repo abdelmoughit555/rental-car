@@ -9,7 +9,6 @@ import SecondaryButton from './SecondaryButton.vue';
 import { useTheme } from '@/Composables/useTheme';
 
 import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css';
 
 const { isDark } = useTheme()
 

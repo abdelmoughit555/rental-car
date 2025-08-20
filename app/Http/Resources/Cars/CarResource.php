@@ -29,6 +29,8 @@ class CarResource extends JsonResource
             'mileage_km' => $this->mileage_km,
             'fuel_type_id' => $this->fuel_type_id,
             'gearbox_id' => $this->gearbox_id,
+            'available_from' => $this->available_from,
+            'available_to' => $this->available_to,
         ];
     }
 }
