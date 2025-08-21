@@ -5,6 +5,7 @@ namespace App\Models\Cars;
 use App\Enums\Cars\CarStatus;
 use App\Models\User;
 use App\Models\Brands\CarModel;
+use App\Models\CarFeatures\Feature;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -52,5 +53,10 @@ class Car extends Model
     public function gearbox(): BelongsTo
     {
         return $this->belongsTo(Gearbox::class);
+    }
+
+    public function features()
+    {
+        return $this->belongsToMany(Feature::class, 'car_features', 'car_id', 'feature_id');
     }
 }

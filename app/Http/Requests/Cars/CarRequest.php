@@ -41,12 +41,14 @@ class CarRequest extends FormRequest
             'available_from' => ['sometimes','required','date','date_format:Y-m-d','after_or_equal:today'],
             'available_to'   => ['sometimes','required','date','date_format:Y-m-d','after:available_from'],
             'price_per_day' => ['sometimes', 'required', 'numeric', 'min:0.01', 'max:999999.99'],
+            'features' => ['sometimes', 'array'],
+            'features.*' => ['integer', 'exists:features,id'],
         ];
     }
 
     public function handle()
     {
-        return;
+        $this->handleFeatures();
     }
 
     /**
@@ -72,5 +74,14 @@ class CarRequest extends FormRequest
                 );
             }
         });
+    }
+
+    public function handleFeatures()
+    {
+        if(!$this->filled('features')) {
+            return;
+        }
+
+        $this->car->features()->sync($this->input('features'));
     }
 }

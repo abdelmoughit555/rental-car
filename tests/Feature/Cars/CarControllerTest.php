@@ -3,6 +3,7 @@
 namespace Tests\Feature\Cars;
 
 use App\Events\Cars\CarUpdated;
+use App\Models\CarFeatures\Feature;
 use App\Models\Cars\Car;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -487,5 +488,220 @@ class CarControllerTest extends TestCase
         ]);
         
         $this->assertEquals(250.00, $car->fresh()->price_per_day);
+    }
+
+    public function test_car_update_validates_features_is_array()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'features' => 'not-an-array'
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['features']);
+    }
+
+    public function test_car_update_validates_features_contains_valid_feature_ids()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'features' => [99999, 'invalid-id', 88888]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['features.0', 'features.1', 'features.2']);
+    }
+
+    public function test_car_update_accepts_empty_features_array()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'features' => []
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertCount(0, $car->fresh()->features);
+    }
+
+    public function test_car_update_syncs_features_correctly()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        // Create some features
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+        $feature3 = Feature::factory()->create();
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature1->id, $feature2->id]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $car->refresh();
+        $this->assertCount(2, $car->features);
+        $this->assertTrue($car->features->contains($feature1->id));
+        $this->assertTrue($car->features->contains($feature2->id));
+        $this->assertFalse($car->features->contains($feature3->id));
+    }
+
+    public function test_car_update_features_with_other_fields()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'title' => 'Updated Title',
+            'features' => [$feature1->id, $feature2->id],
+            'price_per_day' => 150.00
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'title' => 'Updated Title',
+        ]);
+
+        $car->refresh();
+        $this->assertCount(2, $car->features);
+        $this->assertTrue($car->features->contains($feature1->id));
+        $this->assertTrue($car->features->contains($feature2->id));
+    }
+
+    public function test_car_update_features_replaces_existing_features()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+        $feature3 = Feature::factory()->create();
+        $feature4 = Feature::factory()->create();
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature1->id, $feature2->id]
+        ])->assertStatus(200);
+
+        $car->refresh();
+        $this->assertCount(2, $car->features);
+        $this->assertTrue($car->features->contains($feature1->id));
+        $this->assertTrue($car->features->contains($feature2->id));
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature3->id, $feature4->id]
+        ])->assertStatus(200);
+
+        $car->refresh();
+        $this->assertCount(2, $car->features);
+        $this->assertFalse($car->features->contains($feature1->id));
+        $this->assertFalse($car->features->contains($feature2->id));
+        $this->assertTrue($car->features->contains($feature3->id));
+        $this->assertTrue($car->features->contains($feature4->id));
+    }
+
+    public function test_car_update_features_removes_all_features_when_empty()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature1->id, $feature2->id]
+        ])->assertStatus(200);
+
+        $car->refresh();
+        $this->assertCount(2, $car->features);
+
+        // Now remove all features
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => []
+        ])->assertStatus(200);
+
+        $car->refresh();
+        $this->assertCount(0, $car->features);
+    }
+
+    public function test_car_update_features_validation_ignores_non_features_fields()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature1->id],
+            'title' => 'Updated Title',
+            'price_per_day' => 200.00
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $car->refresh();
+        $this->assertEquals('Updated Title', $car->title);
+        $this->assertEquals(200.00, $car->price_per_day);
+        $this->assertCount(1, $car->features);
+        $this->assertTrue($car->features->contains($feature1->id));
+    }
+
+    public function test_car_update_features_event_is_dispatched()
+    {
+        Event::fake([
+            CarUpdated::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => [$feature1->id]
+        ])->assertStatus(200);
+
+        Event::assertDispatched(CarUpdated::class, function ($event) use ($car) {
+            return $event->carId === $car->id;
+        });
+    }
+
+    public function test_car_update_features_event_is_not_dispatched_on_validation_failure()
+    {
+        Event::fake([
+            CarUpdated::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'features' => ['invalid-feature-id']
+        ])->assertStatus(422);
+
+        Event::assertNotDispatched(CarUpdated::class);
     }
 }

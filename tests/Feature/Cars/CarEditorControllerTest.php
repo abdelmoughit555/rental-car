@@ -5,6 +5,8 @@ namespace Tests\Feature\Cars;
 use App\Models\Cars\Car;
 use App\Models\Brands\Make;
 use App\Models\Brands\CarModel;
+use App\Models\CarFeatures\Feature;
+use App\Models\CarFeatures\FeatureCategory;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
 use App\Models\User;
@@ -278,6 +280,146 @@ class CarEditorControllerTest extends TestCase
                 ->where('validation.id', $car->id)
                 ->where('validation.valid', false)
                 ->has('validation.information')
+        );
+    }
+
+    public function test_features_page_renders_with_valid_car()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', true)
+                ->where('validation.features', [])
+        );
+    }
+
+    public function test_features_page_loads_car_features_relationship()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+        
+        $car->features()->attach([$feature1->id, $feature2->id]);
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('car')
+                ->where('car.features', [$feature1->id, $feature2->id])
+        );
+    }
+
+    public function test_features_page_shows_validation_errors_for_missing_features()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        // Create feature categories with features
+        $category1 = FeatureCategory::factory()->create(['name' => 'Safety']);
+        $category2 = FeatureCategory::factory()->create(['name' => 'Comfort']);
+        
+        $feature1 = Feature::factory()->create(['feature_category_id' => $category1->id]);
+        $feature2 = Feature::factory()->create(['feature_category_id' => $category2->id]);
+        
+        $car->features()->detach();
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', false)
+                ->has('validation.features')
+        );
+    }
+
+    public function test_features_page_shows_category_specific_validation_errors()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $safetyCategory = FeatureCategory::factory()->create(['name' => 'Safety']);
+        $comfortCategory = FeatureCategory::factory()->create(['name' => 'Comfort']);
+        
+        $safetyFeature = Feature::factory()->create(['feature_category_id' => $safetyCategory->id]);
+        $comfortFeature = Feature::factory()->create(['feature_category_id' => $comfortCategory->id]);
+        
+        $car->features()->attach([$safetyFeature->id]);
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', false)
+                ->has('validation.features')
+        );
+    }
+
+    public function test_features_page_unauthenticated_user_cannot_access()
+    {
+        $car = Car::factory()->create();
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(302);
+    }
+
+    public function test_features_page_car_resource_includes_features()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $feature1 = Feature::factory()->create();
+        $feature2 = Feature::factory()->create();
+        
+        $car->features()->attach([$feature1->id, $feature2->id]);
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('car')
+                ->where('car.id', $car->id)
+                ->where('car.features', [$feature1->id, $feature2->id])
+        );
+    }
+
+    public function test_features_page_validation_structure_for_features()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $category = FeatureCategory::factory()->create(['name' => 'Safety']);
+        $feature = Feature::factory()->create(['feature_category_id' => $category->id]);
+        
+        $car->features()->detach();
+
+        $response = $this->get("/cars/{$car->id}/features");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Features')
+                ->has('validation')
+                ->where('validation.id', $car->id)
+                ->where('validation.valid', false)
+                ->has('validation.features')
         );
     }
 }
