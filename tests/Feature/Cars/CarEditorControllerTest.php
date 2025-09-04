@@ -12,6 +12,7 @@ use App\Models\Cars\Gearbox;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CarEditorControllerTest extends TestCase
@@ -22,7 +23,9 @@ class CarEditorControllerTest extends TestCase
     {
         parent::setUp();
         
-        // Create required related models
+        Storage::fake('local');
+        Storage::fake('s3');
+        
         Make::factory()->create();
         CarModel::factory()->create();
         FuelType::factory()->create();
@@ -636,14 +639,15 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        $media = $car->appendMedia([
-            'name' => 'test-image',
-            'extension' => 'jpg',
-            'directory' => 'car_images/front_view',
-            'type' => 'uploaded',
-            'disk' => 's3',
-            'size' => 1024000
-        ]);
+        $media = Media::factory()
+            ->forCar($car)
+            ->withName('test-image')
+            ->withExtension('jpg')
+            ->frontView()
+            ->state([
+                'size' => 1024000
+            ])
+            ->create();
 
         $response = $this->get("/cars/{$car->id}/images");
 
