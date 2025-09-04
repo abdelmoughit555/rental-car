@@ -14,6 +14,9 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
+        
+        <!-- AWS SDK for file uploads -->
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.2.43.min.js"></script>
     </head>
     <body class="font-sans antialiased">
         @inertia

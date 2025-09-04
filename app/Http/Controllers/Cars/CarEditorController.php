@@ -44,4 +44,14 @@ class CarEditorController extends Controller
             'validation' => (new CarValidator)->featuresValidation($car)
         ]);
     }
+
+    public function images(Car $car, Request $request)
+    {
+        $car->load('media');
+
+        return Inertia::render('Cars/Edit/Images', [
+            'car' => CarResource::make($car),
+            'validation' => (new CarValidator)->mediaValidation($car)
+        ]);
+    }
 }

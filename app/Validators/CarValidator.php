@@ -168,4 +168,27 @@ class CarValidator implements ModelValidator
             'valid' => count($errors) === 0
         ];
     }
+
+    public function mediaValidation(Car $car)
+    {
+        $errors = [];
+
+        // Check if car has media for each required section
+        $requiredSections = ['front_view', 'interior_dashboard', 'main_seats', 'back_seats_trunk'];
+        
+        foreach ($requiredSections as $section) {
+            $directory = "car_images/{$section}";
+            $sectionMedia = $car->media()->where('directory', $directory)->get();
+            
+            if ($sectionMedia->count() < 3) {
+                $errors[$section] = "At least 3 images are required for {$section} section";
+            }
+        }
+
+        return [
+            'id' => $car->id,
+            'media' => $errors,
+            'valid' => count($errors) === 0
+        ];
+    }
 }

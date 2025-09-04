@@ -7,11 +7,21 @@ use App\Models\CarFeatures\Feature;
 use App\Models\Cars\Car;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CarControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Set up storage disks for testing
+        Storage::fake('local');
+        Storage::fake('s3');
+    }
 
     public function test_a_user_can_update_a_car()
     {
@@ -703,5 +713,472 @@ class CarControllerTest extends TestCase
         ])->assertStatus(422);
 
         Event::assertNotDispatched(CarUpdated::class);
+    }
+
+    public function test_car_update_validates_images_structure()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => 'not-an-array'
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images']);
+    }
+
+    public function test_car_update_validates_image_sections_structure()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => 'not-an-array',
+                'interior_dashboard' => 'not-an-array'
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view', 'images.interior_dashboard']);
+    }
+
+    public function test_car_update_validates_image_file_name_is_required()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_extension' => 'jpg',
+                        'size' => 1024,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.file_name']);
+    }
+
+    public function test_car_update_validates_image_file_extension_is_required()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'size' => 1024,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.file_extension']);
+    }
+
+    public function test_car_update_validates_image_file_extension_allowed_values()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.invalid',
+                        'file_extension' => 'invalid',
+                        'size' => 1024,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.file_extension']);
+    }
+
+    public function test_car_update_validates_image_size_is_required()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.size']);
+    }
+
+    public function test_car_update_validates_image_size_minimum_value()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 0,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.size']);
+    }
+
+    public function test_car_update_validates_image_type_is_required()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024,
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.type']);
+    }
+
+    public function test_car_update_validates_image_type_allowed_values()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024,
+                        'type' => 'image/invalid',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.type']);
+    }
+
+    public function test_car_update_validates_image_section_is_required()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024,
+                        'type' => 'image/jpeg'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.section']);
+    }
+
+    public function test_car_update_validates_image_section_allowed_values()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024,
+                        'type' => 'image/jpeg',
+                        'section' => 'invalid_section'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['images.front_view.0.section']);
+    }
+
+    public function test_car_update_accepts_valid_image_data()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test-image-1.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ],
+                    [
+                        'file_name' => 'test-image-2.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 2048000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ],
+                'interior_dashboard' => [
+                    [
+                        'file_name' => 'test-image-3.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1536000,
+                        'type' => 'image/jpeg',
+                        'section' => 'interior_dashboard'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+    }
+
+    public function test_car_update_validates_all_image_sections()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [[
+                    'file_name' => 'test.jpg',
+                    'file_extension' => 'jpg',
+                    'size' => 1024000,
+                    'type' => 'image/jpeg',
+                    'section' => 'front_view'
+                ]],
+                'interior_dashboard' => [[
+                    'file_name' => 'test.jpg',
+                    'file_extension' => 'jpg',
+                    'size' => 1024000,
+                    'type' => 'image/jpeg',
+                    'section' => 'interior_dashboard'
+                ]],
+                'main_seats' => [[
+                    'file_name' => 'test.jpg',
+                    'file_extension' => 'jpg',
+                    'size' => 1024000,
+                    'type' => 'image/jpeg',
+                    'section' => 'main_seats'
+                ]],
+                'back_seats_trunk' => [[
+                    'file_name' => 'test.jpg',
+                    'file_extension' => 'jpg',
+                    'size' => 1024000,
+                    'type' => 'image/jpeg',
+                    'section' => 'back_seats_trunk'
+                ]]
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+    }
+
+    public function test_car_update_validates_additional_images_section()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'additional' => [
+                    [
+                        'file_name' => 'additional-1.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'additional'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+    }
+
+    public function test_car_update_images_with_other_fields()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'title' => 'Updated Title',
+            'description' => 'Updated Description',
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'title' => 'Updated Title',
+            'description' => 'Updated Description'
+        ]);
+    }
+
+    public function test_car_update_images_event_is_dispatched()
+    {
+        Event::fake([
+            CarUpdated::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ])->assertStatus(200);
+
+        Event::assertDispatched(CarUpdated::class, function ($event) use ($car) {
+            return $event->carId === $car->id;
+        });
+    }
+
+    public function test_car_update_images_event_is_not_dispatched_on_validation_failure()
+    {
+        Event::fake([
+            CarUpdated::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'invalid',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ])->assertStatus(422);
+
+        Event::assertNotDispatched(CarUpdated::class);
+    }
+
+    public function test_car_update_accepts_multiple_image_formats()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->putJson("/api/cars/{$car->id}", [
+            'images' => [
+                'front_view' => [
+                    [
+                        'file_name' => 'test.jpg',
+                        'file_extension' => 'jpg',
+                        'size' => 1024000,
+                        'type' => 'image/jpeg',
+                        'section' => 'front_view'
+                    ],
+                    [
+                        'file_name' => 'test.png',
+                        'file_extension' => 'png',
+                        'size' => 2048000,
+                        'type' => 'image/png',
+                        'section' => 'front_view'
+                    ],
+                    [
+                        'file_name' => 'test.webp',
+                        'file_extension' => 'webp',
+                        'size' => 1536000,
+                        'type' => 'image/webp',
+                        'section' => 'front_view'
+                    ]
+                ]
+            ]
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car updated successfully'
+        ]);
     }
 }
