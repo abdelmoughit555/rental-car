@@ -46,8 +46,8 @@ async function runUpload(file) {
     if (props.upload?.id) uploadStore.updateUpload(props.upload.id, { uploading: true });
     emit('uploading'); emit('fileSelected', file);
 
-    const directory   = props.upload?.directory || 'artwork';
-    const key         = `${directory}/${uuidv4()}`;
+    const directory = props.upload?.directory || 'artwork';
+    const key = `${directory}/${uuidv4()}`;
     const contentType = file.type || 'application/octet-stream';
 
     // 1) Presign with CSRF-safe POST
@@ -58,13 +58,12 @@ async function runUpload(file) {
 
     // 2) PUT the file to MinIO with progress
     await axios.put(presign.url, file, {
-      headers: presign.headers,             // must include exact Content-Type
+      headers: presign.headers,
       onUploadProgress: (e) => {
         if (!e.total) return;
         const pct = Math.round((e.loaded / e.total) * 100);
         handleUploadProgress(pct / 100);
       },
-      // Avoid Axios auto-transform
       transformRequest: [(d) => d],
       maxBodyLength: Infinity,
       maxContentLength: Infinity,

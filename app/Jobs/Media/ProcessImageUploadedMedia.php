@@ -18,6 +18,7 @@ class ProcessImageUploadedMedia implements ShouldQueue
 
     public $tries = 3;
     public $timeout = 300;
+    public $tempFilename;
 
     /**
      * Create a new job instance.
@@ -105,7 +106,6 @@ class ProcessImageUploadedMedia implements ShouldQueue
                 'processed_at' => now()->toISOString(),
             ];
         } catch (Throwable $e) {
-            dd($e);
             Log::warning("Failed to extract image metadata", [
                 'media_id' => $this->media->id,
                 'error' => $e->getMessage()

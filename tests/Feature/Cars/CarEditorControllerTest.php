@@ -9,6 +9,7 @@ use App\Models\CarFeatures\Feature;
 use App\Models\CarFeatures\FeatureCategory;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -459,22 +460,20 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Create some media for the car
-        $media1 = $car->appendMedia([
-            'name' => 'test-image-1',
-            'extension' => 'jpg',
-            'directory' => 'car_images/front_view',
-            'type' => 'uploaded',
-            'disk' => 's3'
-        ]);
+        // Create some media for the car using factory
+        $media1 = Media::factory()
+            ->forCar($car)
+            ->withName('test-image-1')
+            ->withExtension('jpg')
+            ->frontView()
+            ->create();
         
-        $media2 = $car->appendMedia([
-            'name' => 'test-image-2',
-            'extension' => 'png',
-            'directory' => 'car_images/interior_dashboard',
-            'type' => 'uploaded',
-            'disk' => 's3'
-        ]);
+        $media2 = Media::factory()
+            ->forCar($car)
+            ->withName('test-image-2')
+            ->withExtension('png')
+            ->interiorDashboard()
+            ->create();
 
         $response = $this->get("/cars/{$car->id}/images");
 
