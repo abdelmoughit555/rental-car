@@ -7,11 +7,21 @@ use App\Models\CarFeatures\Feature;
 use App\Models\Cars\Car;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CarControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        // Set up storage disks for testing
+        Storage::fake('local');
+        Storage::fake('s3');
+    }
 
     public function test_a_user_can_update_a_car()
     {

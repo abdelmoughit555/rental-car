@@ -78,7 +78,7 @@ class ProcessImageUploadedMedia implements ShouldQueue
         return Storage::disk($this->media->disk)->exists($this->media->directory . '/' . $this->media->name);
     }
 
-        /**
+    /**
      * Download the file to local storage for processing.
      */
     private function downloadFileLocally(): void
@@ -86,6 +86,7 @@ class ProcessImageUploadedMedia implements ShouldQueue
         $this->tempFilename = 'temp-media/' . Str::uuid()->toString() . '.' . $this->media->extension;
         
         $fileContents = Storage::disk($this->media->disk)->get($this->media->directory . '/' . $this->media->name);
+
         Storage::disk('local')->put($this->tempFilename, $fileContents);
     }
 
@@ -111,7 +112,6 @@ class ProcessImageUploadedMedia implements ShouldQueue
                 'error' => $e->getMessage()
             ]);
             
-            // Return basic metadata if extraction fails
             return [
                 'mime_type' => mime_content_type($localPath),
                 'processed_at' => now()->toISOString(),
