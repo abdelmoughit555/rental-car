@@ -422,4 +422,276 @@ class CarEditorControllerTest extends TestCase
                 ->has('validation.features')
         );
     }
+
+    public function test_images_page_renders_with_valid_car()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $requiredSections = ['front_view', 'interior_dashboard', 'main_seats', 'back_seats_trunk'];
+        
+        foreach ($requiredSections as $section) {
+            for ($i = 1; $i <= 3; $i++) {
+                $car->appendMedia([
+                    'name' => "test-{$section}-{$i}",
+                    'extension' => 'jpg',
+                    'directory' => "car_images/{$section}",
+                    'type' => 'uploaded',
+                    'disk' => 's3'
+                ]);
+            }
+        }
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', true)
+                ->where('validation.media', [])
+        );
+    }
+
+    public function test_images_page_loads_car_media_relationship()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        // Create some media for the car
+        $media1 = $car->appendMedia([
+            'name' => 'test-image-1',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+        
+        $media2 = $car->appendMedia([
+            'name' => 'test-image-2',
+            'extension' => 'png',
+            'directory' => 'car_images/interior_dashboard',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->has('car.media')
+                ->where('car.media.car_images/front_view.0.id', $media1->id)
+                ->where('car.media.car_images/front_view.0.name', 'test-image-1')
+                ->where('car.media.car_images/front_view.0.extension', 'jpg')
+                ->where('car.media.car_images/interior_dashboard.0.id', $media2->id)
+                ->where('car.media.car_images/interior_dashboard.0.name', 'test-image-2')
+                ->where('car.media.car_images/interior_dashboard.0.extension', 'png')
+        );
+    }
+
+    public function test_images_page_shows_validation_errors_for_missing_images()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $car->media()->delete();
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', false)
+                ->has('validation.media')
+        );
+    }
+
+    public function test_images_page_shows_partial_validation_errors()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $car->appendMedia([
+            'name' => 'test-image',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->has('validation')
+                ->where('validation.valid', false)
+                ->has('validation.media')
+        );
+    }
+
+    public function test_images_page_unauthenticated_user_cannot_access()
+    {
+        $car = Car::factory()->create();
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(302);
+    }
+
+    public function test_images_page_car_resource_includes_media()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $media = $car->appendMedia([
+            'name' => 'test-image',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->where('car.id', $car->id)
+                ->has('car.media')
+                ->where('car.media.car_images/front_view.0.id', $media->id)
+        );
+    }
+
+    public function test_images_page_validation_structure_for_images()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $car->media()->delete();
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('validation')
+                ->where('validation.id', $car->id)
+                ->where('validation.valid', false)
+                ->has('validation.media')
+        );
+    }
+
+    public function test_images_page_media_grouped_by_directory()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $frontViewMedia1 = $car->appendMedia([
+            'name' => 'front-1',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+        
+        $frontViewMedia2 = $car->appendMedia([
+            'name' => 'front-2',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+        
+        $interiorMedia = $car->appendMedia([
+            'name' => 'interior-1',
+            'extension' => 'png',
+            'directory' => 'car_images/interior_dashboard',
+            'type' => 'uploaded',
+            'disk' => 's3'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car.media')
+                ->has('car.media.car_images/front_view')
+                ->has('car.media.car_images/interior_dashboard')
+                ->where('car.media.car_images/front_view.0.id', $frontViewMedia1->id)
+                ->where('car.media.car_images/front_view.1.id', $frontViewMedia2->id)
+                ->where('car.media.car_images/interior_dashboard.0.id', $interiorMedia->id)
+        );
+    }
+
+    public function test_images_page_media_resource_structure()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        $media = $car->appendMedia([
+            'name' => 'test-image',
+            'extension' => 'jpg',
+            'directory' => 'car_images/front_view',
+            'type' => 'uploaded',
+            'disk' => 's3',
+            'size' => 1024000
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car.media.car_images/front_view.0')
+                ->where('car.media.car_images/front_view.0.id', $media->id)
+                ->where('car.media.car_images/front_view.0.name', 'test-image')
+                ->where('car.media.car_images/front_view.0.extension', 'jpg')
+                ->where('car.media.car_images/front_view.0.directory', 'car_images/front_view')
+                ->where('car.media.car_images/front_view.0.size', 1024000)
+                ->where('car.media.car_images/front_view.0.type', 'image/jpg')
+                ->has('car.media.car_images/front_view.0.url')
+                ->has('car.media.car_images/front_view.0.created_at')
+        );
+    }
+
+    public function test_images_page_handles_empty_media_collection()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+        
+        // Ensure no media exists
+        $car->media()->delete();
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => 
+            $page->component('Cars/Edit/Images')
+                ->has('car')
+                ->where('car.media', [])
+                ->has('validation')
+                ->where('validation.valid', false)
+                ->has('validation.media')
+        );
+    }
+
+    public function test_images_page_user_can_access_other_users_car()
+    {
+        $user1 = $this->signIn();
+        $user2 = User::factory()->create();
+        $car = Car::factory()->create(['user_id' => $user2->id]);
+
+        $response = $this->get("/cars/{$car->id}/images");
+
+        $response->assertStatus(200);
+    }
 }

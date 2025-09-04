@@ -26,6 +26,7 @@ const handleStepUpdate = (step) => {
     3: `/cars/${carId}/availability`,
     4: `/cars/${carId}/pricing`,
     5: `/cars/${carId}/features`,
+    6: `/cars/${carId}/images`,
   }
 
   router.visit(routes[step])
@@ -53,5 +54,9 @@ const handleStepUpdate = (step) => {
     step: 5,
     title: 'Features',
     description: 'Set the features of your car',
+  }, {
+    step: 6,
+    title: 'Images',
+    description: 'Set the images of your car',
   }]" :currentStep="currentStep" :clickable="true" @update:currentStep="handleStepUpdate" />
 </template>

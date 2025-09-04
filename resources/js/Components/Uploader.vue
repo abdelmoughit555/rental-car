@@ -130,7 +130,8 @@
 	};
 
 	const complete = (data) => {
-		uploadStore.updateUpload(data.id, { complete: true }, props.scope);
+		// Don't try to update upload store with data.id since it doesn't exist
+		// Just emit the complete event with the data
 		emit('complete', data);
 	};
 
@@ -147,6 +148,13 @@
 	};
 
 	const handleUploadInitiated = (uploads) => {
+		console.log(`=== UPLOADER SCOPE DEBUG ===`);
+		console.log(`Component name: ${props.name}`);
+		console.log(`Props scope: ${props.scope}`);
+		console.log(`Uploads to add:`, uploads);
+		console.log(`Adding to scope: ${props.scope}`);
+		console.log(`=== END SCOPE DEBUG ===`);
+		
 		uploadStore.addUploads(uploads, props.scope);
 		processNextUpload();
 
@@ -166,7 +174,7 @@
 		</Fader>
 
 		<DraggableUploadZone
-			v-if="(multiple || uploadStore.getUploads(scope).length === 0) && allowUploads"
+			v-if="(multiple || uploadStore.getUploads(props.scope).length === 0) && allowUploads"
 			:id="id"
 			:name="name"
 			:message="message"
@@ -176,13 +184,13 @@
 			:validateImageDimensions="validateImageDimensions"
 			:minImageHeight="minImageHeight"
 			:minImageWidth="minImageWidth"
-			:currentUploadCount="uploadStore.getUploads(scope).length"
+			:currentUploadCount="uploadStore.getUploads(props.scope).length"
 			:directory="directory"
 			@uploadInitiated="handleUploadInitiated"
 		/>
 
-		<div v-show="showUploads" v-if="uploadStore.getUploads(scope).length > 0" :class="{ 'mt-4 space-y-2': multiple }">
-			<div v-for="upload in uploadStore.getUploads(scope)" :key="upload.id">
+		<div v-show="showUploads" v-if="uploadStore.getUploads(props.scope).length > 0" :class="{ 'mt-4 space-y-2': multiple }">
+			<div v-for="upload in uploadStore.getUploads(props.scope)" :key="upload.id">
 				<UploaderFile
 					:upload="upload"
 					:showTitle="showTitle"

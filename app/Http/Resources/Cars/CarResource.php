@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Cars;
 
-use Illuminate\Http\Request;
+use App\Http\Resources\Media\MediaResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CarResource extends JsonResource
@@ -12,7 +12,7 @@ class CarResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
         return [
             'id' => $this->id,
@@ -34,6 +34,11 @@ class CarResource extends JsonResource
             'price_per_day' => $this->price_per_day,
             'features' => $this->whenLoaded('features', function () {
                 return $this->features->pluck('id');
+            }),
+            'media' => $this->whenLoaded('media', function () {
+                return $this->media->groupBy('directory')->map(function ($mediaGroup) {
+                    return MediaResource::collection($mediaGroup);
+                });
             }),
         ];
     }
