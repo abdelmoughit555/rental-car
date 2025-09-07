@@ -57,7 +57,7 @@ class CarEditorController extends Controller
 
     public function confirmation(Car $car, Request $request)
     {
-        $car->load(['carModel.make', 'fuelType', 'gearbox', 'features.featureCategory', 'media']);
+        $car->load(['brand', 'carModel', 'fuelType', 'gearbox', 'features.featureCategory', 'media']);
         
         return Inertia::render('Cars/Edit/Confirmation', [
             'car' => CarResource::make($car),

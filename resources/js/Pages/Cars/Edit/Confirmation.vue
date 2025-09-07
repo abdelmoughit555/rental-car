@@ -148,11 +148,13 @@ const submit = () => {
                                     <p class="font-medium">{{ car.title }}</p>
                                 </template>
                             </FieldRowOutput>
-
                             <FieldRowOutput id="brand-model" horizontal :hasPadding="false" class="border border-border rounded-md p-4">
                                 <template #label>Brand & Model</template>
                                 <template #field>
-                                    <p>{{ car.brand?.name && car.car_model?.name ? `${car.brand.name} ${car.car_model.name}` : '--' }}</p>
+                                    <div class="flex flex-col space-y-3">
+                                        <p>Brand: {{ car.brand ? car.brand.name : '--' }}</p>
+                                        <p>Model: {{ car.car_model ? car.car_model.name : '--' }}</p>
+                                    </div>
                                 </template>
                             </FieldRowOutput>
 

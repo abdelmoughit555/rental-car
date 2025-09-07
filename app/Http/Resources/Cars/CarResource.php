@@ -37,7 +37,7 @@ class CarResource extends JsonResource
             'available_from' => $this->available_from,
             'available_to' => $this->available_to,
             'price_per_day' => $this->price_per_day,
-            'brand' => BrandResource::make($this->whenLoaded('carModel.make')),
+            'brand' => BrandResource::make($this->whenLoaded('brand')),
             'car_model' => CarModelResource::make($this->whenLoaded('carModel')),
             'fuel_type' => FuelTypeResource::make($this->whenLoaded('fuelType')),
             'gearbox' => GearboxResource::make($this->whenLoaded('gearbox')),
