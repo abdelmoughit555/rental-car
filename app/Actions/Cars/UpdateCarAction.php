@@ -15,40 +15,51 @@ class UpdateCarAction
         DB::transaction(function () use ($car, $attributes, $features, $images) {
             $car->update(Arr::except($attributes, ['features', 'images']));
 
-            if (array_key_exists('features', $attributes)) {
-                $car->features()->sync($features ?? []);
-            }
-
-            if (!empty($images)) {
-                foreach ($images as $section => $sectionImages) {
-                    $directory = "car_images/{$section}";
-
-                    $existingMedia = $car->media()->where('directory', $directory)->get();
-                    $existingFileNames = $existingMedia->pluck('name')->toArray();
-
-                    $submittedFileNames = collect($sectionImages)->pluck('file_name')->toArray();
-
-                    $existingMedia->whereNotIn('name', $submittedFileNames)->each->delete();
-
-                    foreach ($sectionImages as $image) {
-                        if (!in_array($image['file_name'], $existingFileNames)) {
-                            $media = $car->appendMedia([
-                                'name' => $image['file_name'],
-                                'extension' => $image['file_extension'],
-                                'directory' => $directory,
-                                'type' => 'uploaded',
-                                'disk' => 's3',
-                            ]);
-
-                            ProcessImageUploadedMedia::dispatch($media);
-                            ProcessCarImageDerivatives::dispatch($media);
-                        }
-                    }
-                }
-            }
+            $this->syncFeaturesIfPresent($car, $attributes, $features);
+            $this->syncImagesIfPresent($car, $images);
         });
 
         return $car->fresh();
+    }
+
+    private function syncFeaturesIfPresent(Car $car, array $attributes, ?array $features): void
+    {
+        if (array_key_exists('features', $attributes)) {
+            $car->features()->sync($features ?? []);
+        }
+    }
+
+    private function syncImagesIfPresent(Car $car, ?array $images): void
+    {
+        if (empty($images)) {
+            return;
+        }
+
+        foreach ($images as $section => $sectionImages) {
+            $directory = "car_images/{$section}";
+
+            $existingMedia = $car->media()->where('directory', $directory)->get();
+            $existingFileNames = $existingMedia->pluck('name')->toArray();
+
+            $submittedFileNames = collect($sectionImages)->pluck('file_name')->toArray();
+
+            $existingMedia->whereNotIn('name', $submittedFileNames)->each->delete();
+
+            foreach ($sectionImages as $image) {
+                if (!in_array($image['file_name'], $existingFileNames)) {
+                    $media = $car->appendMedia([
+                        'name' => $image['file_name'],
+                        'extension' => $image['file_extension'],
+                        'directory' => $directory,
+                        'type' => 'uploaded',
+                        'disk' => 's3',
+                    ]);
+
+                    ProcessImageUploadedMedia::dispatch($media);
+                    ProcessCarImageDerivatives::dispatch($media);
+                }
+            }
+        }
     }
 }
 
