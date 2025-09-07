@@ -22,7 +22,6 @@ class CarControllerTest extends TestCase
     {
         parent::setUp();
         
-        // Set up storage disks for testing
         Storage::fake('local');
         Storage::fake('s3');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Cars;
 
+use App\Actions\Cars\UpdateCarAction;
 use App\Enums\Cars\CarStatus;
 use App\Events\Cars\CarUpdated;
 use App\Http\Controllers\Controller;
@@ -13,17 +14,20 @@ use App\Events\Cars\CarSubmitted;
 
 class CarController extends Controller
 {
-    public function update(CarRequest $request, Car $car)
+    public function update(CarRequest $request, Car $car, UpdateCarAction $action)
     {
-        $car->update($request->validated());
+        $car = $action->execute(
+            car: $car,
+            attributes: $request->validated(),
+            features: $request->input('features', []),
+            images: $request->input('images', [])
+        );
 
-        $request->handle();
-        
         CarUpdated::dispatch($car->id);
 
         return response()->json([
             'message' => 'Car updated successfully',
-            'car' => CarResource::make($car)
+            'car' => CarResource::make($car->fresh(['features','media']))
         ]);
     }
 

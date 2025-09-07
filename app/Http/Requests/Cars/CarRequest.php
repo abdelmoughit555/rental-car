@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Cars;
 
-use Carbon\Carbon;
+use App\Rules\AtLeastDaysAfter;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Jobs\Media\ProcessImageUploadedMedia;
-use App\Jobs\Media\ProcessCarImageDerivatives;
 
 class CarRequest extends FormRequest
 {
@@ -39,7 +37,7 @@ class CarRequest extends FormRequest
             'seats' => ['sometimes', 'required', 'integer', 'min:1', 'max:10'],
             'mileage_km' => ['sometimes', 'required', 'integer', 'min:0', 'max:1000000'],
             'available_from' => ['sometimes','required','date','date_format:Y-m-d','after_or_equal:today'],
-            'available_to'   => ['sometimes','required','date','date_format:Y-m-d','after:available_from'],
+            'available_to'   => ['sometimes','required','date','date_format:Y-m-d','after:available_from', new AtLeastDaysAfter('available_from', 14)],
             'price_per_day' => ['sometimes', 'required', 'numeric', 'min:0.01', 'max:999999.99'],
             'features' => ['sometimes', 'array'],
             'features.*' => ['integer', 'exists:features,id'],
@@ -88,80 +86,5 @@ class CarRequest extends FormRequest
         ];
     }
 
-    public function handle()
-    {
-        $this->handleImages();
-
-        $this->handleFeatures();
-    }
-
-    /**
-     * Configure the validator instance.
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            if (! $this->filled('available_from') || ! $this->filled('available_to')) {
-                return;
-            }
-    
-            if ($validator->errors()->has('available_from') || $validator->errors()->has('available_to')) {
-                return;
-            }
-    
-            $from = Carbon::createFromFormat('Y-m-d', $this->input('available_from'))->startOfDay();
-            $to   = Carbon::createFromFormat('Y-m-d', $this->input('available_to'))->startOfDay();
-    
-            if ($from->diffInDays($to) < 14) {
-                $validator->errors()->add(
-                    'available_to', 'Available To must be at least 2 weeks (14 days) after Available From.'
-                );
-            }
-        });
-    }
-
-    public function handleFeatures()
-    {
-        if(!$this->filled('features')) {
-            return;
-        }
-
-        $this->car->features()->sync($this->input('features'));
-    }
-
-    private function handleImages()
-    {
-        if(!$this->filled('images')) {
-            return;
-        }
-
-        foreach($this->input('images') as $key => $value) {
-            $directory = "car_images/{$key}";
-            
-            $existingMedia = $this->car->media()->where('directory', $directory)->get();
-            $existingFileNames = $existingMedia->pluck('name')->toArray();
-            
-            $submittedFileNames = collect($value)->pluck('file_name')->toArray();
-            
-            $mediaToDelete = $existingMedia->whereNotIn('name', $submittedFileNames);
-            foreach($mediaToDelete as $media) {
-                $media->delete();
-            }
-            
-            foreach($value as $image) {
-                if (!in_array($image['file_name'], $existingFileNames)) {
-                    $media = $this->car->appendMedia([
-                        'name' => $image['file_name'],
-                        'extension' => $image['file_extension'],
-                        'directory' => $directory,
-                        'type' => 'uploaded',
-                        'disk' => 's3'
-                    ]);
-
-                    ProcessImageUploadedMedia::dispatchSync($media);
-                    ProcessCarImageDerivatives::dispatchSync($media);
-                }
-            }
-        }        
-    }
+    // No side effects here; FormRequest is for validation only.
 }
