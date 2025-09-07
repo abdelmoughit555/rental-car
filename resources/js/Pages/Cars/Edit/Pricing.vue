@@ -27,7 +27,7 @@ const watchedFields = ['price_per_day']
 
 const sectionErrors = computed(() => {
   if (!props.validation) return []
-  return watchedFields.flatMap(field => props.validation?.price[field] || []) || []
+  return watchedFields.flatMap(field => props.validation?.pricing[field] || []) || []
 })
 
 const hasSectionError = computed(() => sectionErrors.value.length > 0)

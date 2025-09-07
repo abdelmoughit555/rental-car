@@ -26,7 +26,6 @@ const uploadedFiles = ref({
     back_seats_trunk: []
 });
 
-// Helper function to convert server media to client format
 const convertServerMediaToClientFormat = (media) => {
     return {
         id: media.id,
@@ -43,10 +42,8 @@ const convertServerMediaToClientFormat = (media) => {
     };
 };
 
-// Load existing images from server on component mount
 onMounted(() => {
     if (props.car.media) {
-        // Group media by directory/section
         const mediaBySection = {};
         
         Object.keys(props.car.media).forEach(directory => {
@@ -56,31 +53,26 @@ onMounted(() => {
             }
         });
         
-        // Update uploadedFiles with existing media
         Object.keys(mediaBySection).forEach(section => {
             uploadedFiles.value[section] = mediaBySection[section];
         });
     }
 });
 
-// Helper function to get errors for a specific section
 const getSectionErrors = (sectionKey) => {
     if (!errors.value || !errors.value[`images.${sectionKey}`]) return [];
     return errors.value[`images.${sectionKey}`];
 };
 
-// Helper function to check if a section has errors
 const hasSectionErrors = (sectionKey) => {
     return getSectionErrors(sectionKey).length > 0;
 };
 
-// Check if there are any validation errors
 const hasAnyValidationErrors = computed(() => {
     if (!errors.value) return false;
     return Object.keys(errors.value).some(key => key.startsWith('images.'));
 });
 
-// Get all validation errors as a flat array
 const allValidationErrors = computed(() => {
     if (!errors.value) return [];
     const errorArray = [];
@@ -95,7 +87,6 @@ const allValidationErrors = computed(() => {
 const loading = ref(false)
 const { toast } = useToast()
 
-// Handle files updated from child components
 const handleFilesUpdated = (section, files) => {
     if (section && files) {
         uploadedFiles.value[section] = files;
@@ -130,7 +121,6 @@ const save = () => {
     <EditCarLayout :title="`Car Images - ${car.title}`" :currentStep="6">
         <template #content>
             <div class="space-y-4">
-                <!-- Display validation errors -->
                 <ErrorList 
                     v-if="hasAnyValidationErrors"
                     title="Please fix the following errors:"
@@ -149,9 +139,7 @@ const save = () => {
                         </template>
                     </Alert>
                     
-                    <!-- Photo Sections -->
                     <div class="space-y-6">
-                        <!-- Front ¾ View Section -->
                         <div class="relative">
                             <CarImageSection
                                 :key="'front_view'"
@@ -170,7 +158,6 @@ const save = () => {
                             </div>
                         </div>
 
-                        <!-- Interior Dashboard Section -->
                         <div class="relative">
                             <CarImageSection
                                 :key="'interior_dashboard'"
@@ -189,7 +176,6 @@ const save = () => {
                             </div>
                         </div>
 
-                        <!-- Main Seats Section -->
                         <div class="relative">
                             <CarImageSection
                                 :key="'main_seats'"
@@ -208,7 +194,6 @@ const save = () => {
                             </div>
                         </div>
 
-                        <!-- Back Seats or Trunk Section -->
                         <div class="relative">
                             <CarImageSection
                                 :key="'back_seats_trunk'"

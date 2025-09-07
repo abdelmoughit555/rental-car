@@ -38,7 +38,7 @@ const save = () => {
     return axios.put(`/api/cars/${props.car.id}`, {
         available_from: car.value.available_from,
         available_to: car.value.available_to,
-    }).then(({data}) => {
+    }).then(() => {
         loading.value = false
         toast({
             title: 'Car updated',

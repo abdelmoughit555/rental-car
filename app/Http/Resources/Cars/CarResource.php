@@ -3,6 +3,11 @@
 namespace App\Http\Resources\Cars;
 
 use App\Http\Resources\Media\MediaResource;
+use App\Http\Resources\Features\FeatureResource;
+use App\Http\Resources\Brands\BrandResource;
+use App\Http\Resources\Brands\CarModelResource;
+use App\Http\Resources\Cars\FuelTypeResource;
+use App\Http\Resources\Cars\GearboxResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CarResource extends JsonResource
@@ -32,9 +37,11 @@ class CarResource extends JsonResource
             'available_from' => $this->available_from,
             'available_to' => $this->available_to,
             'price_per_day' => $this->price_per_day,
-            'features' => $this->whenLoaded('features', function () {
-                return $this->features->pluck('id');
-            }),
+            'brand' => BrandResource::make($this->whenLoaded('carModel.make')),
+            'car_model' => CarModelResource::make($this->whenLoaded('carModel')),
+            'fuel_type' => FuelTypeResource::make($this->whenLoaded('fuelType')),
+            'gearbox' => GearboxResource::make($this->whenLoaded('gearbox')),
+            'features' => FeatureResource::collection($this->whenLoaded('features')),
             'media' => $this->whenLoaded('media', function () {
                 return $this->media->groupBy('directory')->map(function ($mediaGroup) {
                     return MediaResource::collection($mediaGroup);

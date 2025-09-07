@@ -3,8 +3,12 @@
 namespace Tests\Feature\Cars;
 
 use App\Events\Cars\CarUpdated;
+use App\Events\Cars\CarSubmitted;
 use App\Models\CarFeatures\Feature;
 use App\Models\Cars\Car;
+use App\Models\Brands\Make;
+use App\Models\Media;
+use App\Enums\Cars\CarStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +25,35 @@ class CarControllerTest extends TestCase
         // Set up storage disks for testing
         Storage::fake('local');
         Storage::fake('s3');
+    }
+
+    protected function createValidCarForSubmission($user, $status = CarStatus::DRAFT)
+    {
+        $brand = Make::factory()->create();
+
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => $status,
+            'brand_id' => $brand->id,
+            'available_from' => now()->addWeek(),
+            'available_to' => now()->addWeeks(3),
+            'price_per_day' => 150.00
+        ]);
+
+        $features = Feature::factory()->count(2)->create();
+        $car->features()->attach($features->pluck('id'));
+
+        $sections = ['front_view', 'interior_dashboard', 'main_seats', 'back_seats_trunk'];
+        foreach ($sections as $section) {
+            Media::factory()
+                ->forCar($car)
+                ->forSection($section)
+                ->processed()
+                ->count(3)
+                ->create();
+        }
+
+        return $car;
     }
 
     public function test_a_user_can_update_a_car()
@@ -63,8 +96,8 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $response = $this->putJson("/api/cars/{$car->id}", [
-            'title' => '', // Empty title should fail
-            'description' => '' // Empty description should fail
+            'title' => '', 
+            'description' => ''
         ]);
 
         $response->assertStatus(422);
@@ -77,8 +110,8 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $response = $this->putJson("/api/cars/{$car->id}", [
-            'title' => str_repeat('a', 256), // Exceeds max:512
-            'description' => str_repeat('a', 1001) // Exceeds max:512
+            'title' => str_repeat('a', 256),
+            'description' => str_repeat('a', 1001)
         ]);
 
         $response->assertStatus(422);
@@ -110,13 +143,13 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $response = $this->putJson("/api/cars/{$car->id}", [
-            'year' => 1899, // Below min:1900
-            'engine_cc' => 99, // Below min:100
-            'power_hp' => 99, // Below min:100
-            'doors' => 0, // Below min:1
-            'seats' => 0, // Below min:1
-            'mileage_km' => -1, // Below min:0
-            'price_per_day' => 0.00 // Below min:0.01
+            'year' => 1899,
+            'engine_cc' => 99,
+            'power_hp' => 99,
+            'doors' => 0,
+            'seats' => 0,
+            'mileage_km' => -1,
+            'price_per_day' => 0.00
         ]);
 
         $response->assertStatus(422);
@@ -129,10 +162,10 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $response = $this->putJson("/api/cars/{$car->id}", [
-            'brand_id' => 99999, // Non-existent ID
-            'car_model_id' => 99999, // Non-existent ID
-            'gearbox_id' => 99999, // Non-existent ID
-            'fuel_type_id' => 99999 // Non-existent ID
+            'brand_id' => 99999,
+            'car_model_id' => 99999,
+            'gearbox_id' => 99999,
+            'fuel_type_id' => 99999
         ]);
 
         $response->assertStatus(422);
@@ -188,7 +221,7 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $this->putJson("/api/cars/{$car->id}", [
-            'title' => '' // Invalid - empty title
+            'title' => ''
         ])->assertStatus(422);
 
         Event::assertNotDispatched(CarUpdated::class);
@@ -204,7 +237,6 @@ class CarControllerTest extends TestCase
             'year' => 2020
         ]);
 
-        // Only update title, leave other fields unchanged
         $response = $this->putJson("/api/cars/{$car->id}", [
             'title' => 'Only Title Updated'
         ]);
@@ -214,8 +246,8 @@ class CarControllerTest extends TestCase
         $this->assertDatabaseHas('cars', [
             'id' => $car->id,
             'title' => 'Only Title Updated',
-            'description' => 'Original Description', // Should remain unchanged
-            'year' => 2020 // Should remain unchanged
+            'description' => 'Original Description',
+            'year' => 2020
         ]);
     }
 
@@ -232,7 +264,6 @@ class CarControllerTest extends TestCase
 
         $response->assertStatus(401);
         
-        // Verify the car was not updated
         $this->assertDatabaseHas('cars', [
             'id' => $car->id,
             'title' => 'Original Title',
@@ -275,7 +306,7 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $availableFrom = now()->addWeek()->format('Y-m-d');
-        $availableTo = now()->addDays(3)->format('Y-m-d'); // Before available_from
+        $availableTo = now()->addDays(3)->format('Y-m-d');
 
         $response = $this->putJson("/api/cars/{$car->id}", [
             'available_from' => $availableFrom,
@@ -292,7 +323,7 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $availableFrom = now()->addWeek()->format('Y-m-d');
-        $availableTo = now()->addDays(10)->format('Y-m-d'); // Less than 14 days
+        $availableTo = now()->addDays(10)->format('Y-m-d');
 
         $response = $this->putJson("/api/cars/{$car->id}", [
             'available_from' => $availableFrom,
@@ -309,7 +340,7 @@ class CarControllerTest extends TestCase
         $car = Car::factory()->create(['user_id' => $user->id]);
 
         $availableFrom = now()->addWeek()->format('Y-m-d');
-        $availableTo = now()->addWeeks(3)->format('Y-m-d'); // More than 14 days
+        $availableTo = now()->addWeeks(3)->format('Y-m-d');
 
         $response = $this->putJson("/api/cars/{$car->id}", [
             'available_from' => $availableFrom,
@@ -1180,5 +1211,218 @@ class CarControllerTest extends TestCase
         $response->assertJson([
             'message' => 'Car updated successfully'
         ]);
+    }
+
+    public function test_car_submission_successfully_submits_draft_car()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+        $car = $this->createValidCarForSubmission($user);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'message' => 'Car Submitted',
+            'car' => $car->id
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => CarStatus::PENDING_APPROVAL->value
+        ]);
+
+        Event::assertDispatched(CarSubmitted::class, function ($event) use ($car) {
+            return $event->carId === $car->id;
+        });
+    }
+
+    public function test_car_submission_fails_when_car_is_not_in_draft_status()
+    {
+        $this->withoutExceptionHandling();
+
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => CarStatus::PENDING_APPROVAL
+        ]);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'message' => 'Car is not in a draft state to be submitted',
+            'car' => $car->id
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => CarStatus::PENDING_APPROVAL->value
+        ]);
+
+        Event::assertNotDispatched(CarSubmitted::class);
+    }
+
+    public function test_car_submission_fails_when_car_validation_fails()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => CarStatus::DRAFT
+        ]);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'id',
+                'valid'
+            ]
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => CarStatus::DRAFT->value
+        ]);
+
+        Event::assertNotDispatched(CarSubmitted::class);
+    }
+
+    public function test_car_submission_fails_when_car_has_media_validation_errors()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => CarStatus::DRAFT,
+            'title' => 'Valid Title',
+            'description' => 'Valid Description'
+        ]);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'id',
+                'media',
+                'valid'
+            ]
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => CarStatus::DRAFT->value
+        ]);
+
+        Event::assertNotDispatched(CarSubmitted::class);
+    }
+
+    public function test_car_submission_fails_when_car_has_features_validation_errors()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => CarStatus::DRAFT,
+            'title' => 'Valid Title',
+            'description' => 'Valid Description'
+        ]);
+
+        Feature::factory()->count(2)->create();
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'id',
+                'features',
+                'valid'
+            ]
+        ]);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => CarStatus::DRAFT->value
+        ]);
+
+        Event::assertNotDispatched(CarSubmitted::class);
+    }
+
+    public function test_car_submission_response_structure()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+        $car = $this->createValidCarForSubmission($user);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'message',
+            'car'
+        ]);
+    }
+
+    public function test_car_submission_validation_failed_response_structure()
+    {
+        Event::fake([
+            CarSubmitted::class
+        ]);
+
+        $user = $this->signIn();
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'status' => CarStatus::DRAFT
+        ]);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'id',
+                'valid'
+            ]
+        ]);
+    }
+
+    public function test_car_submission_requires_authentication()
+    {
+        $car = Car::factory()->create([
+            'status' => CarStatus::DRAFT
+        ]);
+
+        $response = $this->putJson("/api/cars/{$car->id}/submission");
+
+        $response->assertStatus(401);
     }
 }

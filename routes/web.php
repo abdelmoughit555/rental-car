@@ -74,6 +74,7 @@ Route::middleware([
             Route::get('/pricing', [CarEditorController::class, 'pricing'])->name('cars.car.pricing');
             Route::get('/features', [CarEditorController::class, 'features'])->name('cars.car.features');
             Route::get('/images', [CarEditorController::class, 'images'])->name('cars.car.images');
+            Route::get('/confirmation', [CarEditorController::class, 'confirmation'])->name('cars.car.confirmation');
         });
     });
 });
