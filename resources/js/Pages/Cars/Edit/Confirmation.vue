@@ -116,7 +116,7 @@ const submit = () => {
 </script>
 
 <template>
-    <EditCarLayout :title="`Review & Submit - ${car.title}`" :currentStep="6">
+    <EditCarLayout :title="`Review & Submit - ${car.title}`" :currentStep="7">
         <template #content>
             <div class="space-y-4">
                 <Panel v-if="!validation.valid">
