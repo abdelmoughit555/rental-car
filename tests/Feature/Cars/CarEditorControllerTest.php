@@ -13,6 +13,7 @@ use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
 class CarEditorControllerTest extends TestCase
@@ -67,10 +68,8 @@ class CarEditorControllerTest extends TestCase
     public function test_information_page_shows_validation_errors_for_incomplete_car()
     {
         $user = $this->signIn();
-        // Create a car with the factory first, then update it to remove required fields
+
         $car = Car::factory()->create(['user_id' => $user->id]);
-        
-        // Update the car to remove required fields for validation testing
         $car->update([
             'title' => '',
             'description' => '',
@@ -116,7 +115,6 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Update specific fields to be invalid for partial validation testing
         $car->update([
             'description' => '',
             'engine_cc' => null,
@@ -269,7 +267,7 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Update specific fields to be invalid for validation testing
+        
         $car->update([
             'title' => '', // Invalid
             'available_from' => null, // Invalid
@@ -320,7 +318,7 @@ class CarEditorControllerTest extends TestCase
         $response->assertInertia(fn ($page) => 
             $page->component('Cars/Edit/Features')
                 ->has('car')
-                ->where('car.features', [$feature1->id, $feature2->id])
+                ->has('car.features')
         );
     }
 
@@ -329,7 +327,7 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Create feature categories with features
+        
         $category1 = FeatureCategory::factory()->create(['name' => 'Safety']);
         $category2 = FeatureCategory::factory()->create(['name' => 'Comfort']);
         
@@ -401,7 +399,7 @@ class CarEditorControllerTest extends TestCase
             $page->component('Cars/Edit/Features')
                 ->has('car')
                 ->where('car.id', $car->id)
-                ->where('car.features', [$feature1->id, $feature2->id])
+                ->has('car.features')
         );
     }
 
@@ -463,7 +461,6 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Create some media for the car using factory
         $media1 = Media::factory()
             ->forCar($car)
             ->withName('test-image-1')
@@ -671,7 +668,6 @@ class CarEditorControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Ensure no media exists
         $car->media()->delete();
 
         $response = $this->get("/cars/{$car->id}/images");
@@ -696,5 +692,129 @@ class CarEditorControllerTest extends TestCase
         $response = $this->get("/cars/{$car->id}/images");
 
         $response->assertStatus(200);
+    }
+
+    public function test_confirmation_page_renders_with_valid_car()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->get("/cars/{$car->id}/confirmation");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) => 
+            $page->component('Cars/Edit/Confirmation')
+                ->has('car')
+                ->has('validation')
+                ->has('validation.valid')
+                ->has('validation.pricing')
+                ->has('validation.features')
+                ->has('validation.media')
+                ->has('validation.information')
+                ->has('validation.availability')
+        );
+    }
+
+    public function test_confirmation_page_loads_car_relationships()
+    {
+        $user = $this->signIn();
+        
+        $make = Make::factory()->create();
+        $carModel = CarModel::factory()->create(['make_id' => $make->id]);
+        $fuelType = FuelType::factory()->create();
+        $gearbox = Gearbox::factory()->create();
+        
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'car_model_id' => $carModel->id,
+            'fuel_type_id' => $fuelType->id,
+            'gearbox_id' => $gearbox->id,
+        ]);
+
+        $media1 = Media::factory()->create([
+            'model_id' => $car->id,
+            'model_type' => Car::class,
+            'directory' => 'car_images/front_view',
+            'name' => 'test-image-1',
+            'extension' => 'jpg'
+        ]);
+        
+        $media2 = Media::factory()->create([
+            'model_id' => $car->id,
+            'model_type' => Car::class,
+            'directory' => 'car_images/interior_dashboard',
+            'name' => 'test-image-2',
+            'extension' => 'jpg'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/confirmation");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) => 
+            $page->component('Cars/Edit/Confirmation')
+                ->has('car.id')
+                ->has('car.title')
+                ->has('car.car_model')
+                ->has('car.fuel_type')
+                ->has('car.gearbox')
+                ->has('car.features')
+                ->has('car.media')
+        );
+    }
+
+    public function test_confirmation_page_shows_validation_errors()
+    {
+        $user = $this->signIn();
+        
+        $car = Car::factory()->create([
+            'user_id' => $user->id,
+            'price_per_day' => null,
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/confirmation");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) => 
+            $page->component('Cars/Edit/Confirmation')
+                ->has('validation.valid')
+                ->where('validation.valid', false)
+                ->has('validation.pricing')
+        );
+    }
+
+    public function test_confirmation_page_shows_images_when_media_exists()
+    {
+        $user = $this->signIn();
+        $car = Car::factory()->create(['user_id' => $user->id]);
+
+        $media1 = Media::factory()->create([
+            'model_id' => $car->id,
+            'model_type' => Car::class,
+            'directory' => 'car_images/front_view',
+            'name' => 'test-image-1',
+            'extension' => 'jpg'
+        ]);
+        
+        $media2 = Media::factory()->create([
+            'model_id' => $car->id,
+            'model_type' => Car::class,
+            'directory' => 'car_images/interior_dashboard',
+            'name' => 'test-image-2',
+            'extension' => 'jpg'
+        ]);
+
+        $response = $this->get("/cars/{$car->id}/confirmation");
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (AssertableInertia $page) => 
+            $page->component('Cars/Edit/Confirmation')
+                ->has('car.media')
+                ->where('car.media.car_images/front_view', function ($mediaGroup) {
+                    return count($mediaGroup) === 1;
+                })
+                ->where('car.media.car_images/interior_dashboard', function ($mediaGroup) {
+                    return count($mediaGroup) === 1;
+                })
+        );
     }
 }

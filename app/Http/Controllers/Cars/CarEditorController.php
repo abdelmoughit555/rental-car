@@ -54,4 +54,14 @@ class CarEditorController extends Controller
             'validation' => (new CarValidator)->mediaValidation($car)
         ]);
     }
+
+    public function confirmation(Car $car, Request $request)
+    {
+        $car->load(['carModel.make', 'fuelType', 'gearbox', 'features.featureCategory', 'media']);
+        
+        return Inertia::render('Cars/Edit/Confirmation', [
+            'car' => CarResource::make($car),
+            'validation' => (new CarValidator)->validate($car)
+        ]);
+    }
 }

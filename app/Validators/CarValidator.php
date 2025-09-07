@@ -20,11 +20,20 @@ class CarValidator implements ModelValidator
 
         $availability = $this->availabilityValidation($car);
 
+        $pricing = $this->pricingValidation($car);
+
+        $features = $this->featuresValidation($car);
+
+        $media = $this->mediaValidation($car);
+
         return [
             'id' => $car->id,
-            'valid' => $this->informationValid,
+            'valid' => $this->isValid(),
             'information' => $information['information'],
             'availability' => $availability['availability'],
+            'pricing' => $pricing['pricing'],
+            'features' => $features['features'],
+            'media' => $media['media'],
         ];
     }
 
@@ -132,7 +141,7 @@ class CarValidator implements ModelValidator
 
         return [
             'id' => $car->id,
-            'price' => $errors,
+            'pricing' => $errors,
             'valid' => count($errors) === 0
         ];
     }
@@ -174,14 +183,19 @@ class CarValidator implements ModelValidator
         $errors = [];
 
         // Check if car has media for each required section
-        $requiredSections = ['front_view', 'interior_dashboard', 'main_seats', 'back_seats_trunk'];
+        $requiredSections = [
+            'front_view' => 'Front View',
+            'interior_dashboard' => 'Interior Dashboard', 
+            'main_seats' => 'Main Seats',
+            'back_seats_trunk' => 'Back Seats & Trunk'
+        ];
         
-        foreach ($requiredSections as $section) {
+        foreach ($requiredSections as $section => $displayName) {
             $directory = "car_images/{$section}";
             $sectionMedia = $car->media()->where('directory', $directory)->get();
             
             if ($sectionMedia->count() < 3) {
-                $errors[$section] = "At least 3 images are required for {$section} section";
+                $errors[$section] = "At least 3 images are required for {$displayName} section";
             }
         }
 
@@ -190,5 +204,10 @@ class CarValidator implements ModelValidator
             'media' => $errors,
             'valid' => count($errors) === 0
         ];
+    }
+
+    private function isValid()
+    {
+        return $this->informationValid && $this->availabilityValid && $this->pricingValid && $this->featuresValid;
     }
 }

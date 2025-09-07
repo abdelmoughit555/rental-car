@@ -2,7 +2,6 @@
 import EditCarLayout from '../Edit/EditCarLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { useToast } from '@/Components/shadcn/ui/toast/use-toast';
 import { computed, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
@@ -26,45 +25,24 @@ const featureCategories = usePage().props.featureCategories;
 
 const car = ref({
     ...props.car,
-    features: props.car.features || []
+    features: props.car.features ? props.car.features.map(feature => feature.id) : []
 });
 
-// Helper function to get errors for a specific category
 const getCategoryErrors = (categoryId) => {
   if (!props.validation?.features) return []
-  return props.validation.features[categoryId] || []
+  const errors = props.validation.features[categoryId]
+  return errors ? [errors] : []
 }
 
-// Helper function to check if a category has errors
-const hasCategoryErrors = (categoryId) => {
-  return getCategoryErrors(categoryId).length > 0
-}
-
-// Check if there are any validation errors across all categories
-const hasAnyValidationErrors = computed(() => {
-  return featureCategories.some(category => hasCategoryErrors(category.id))
-})
-
-// Computed property to show selected features count
 const selectedFeaturesCount = computed(() => car.value.features.length)
 
-// Helper function to check if a feature is selected
 const isFeatureSelected = (featureId) => {
     return car.value.features.includes(featureId);
 }
 
-// Helper function to toggle feature selection
 const toggleFeature = (featureId) => {
     const index = car.value.features.indexOf(featureId);
-    if (index > -1) {
-        // Remove feature if already selected
-        car.value.features.splice(index, 1);
-        console.log('Removed feature:', featureId, 'New features:', car.value.features);
-    } else {
-        // Add feature if not selected
-        car.value.features.push(featureId);
-        console.log('Added feature:', featureId, 'New features:', car.value.features);
-    }
+    index > -1 ? car.value.features.splice(index, 1) : car.value.features.push(featureId);
 }
 
 const save = () => {
@@ -81,7 +59,7 @@ const save = () => {
             variant: 'success',
         })
 
-        router.visit(`/cars/${car.value.id}/features`)
+        router.visit(`/cars/${car.value.id}/images`)
     }).catch((error) => {
         loading.value = false
         if (error.response.status === 422) {
@@ -114,14 +92,14 @@ const save = () => {
                         {{ category.description }}
                     </template>
                     <template #aside>
-                        <ValidationInfo v-if="hasCategoryErrors(category.id)" :errors="getCategoryErrors(category.id)"/>
+                        <ValidationInfo v-if="getCategoryErrors(category.id).length > 0" :errors="getCategoryErrors(category.id)"/>
                     </template>
                     <template #content>
                         <div class="grid grid-cols-3 gap-4">
                             <div v-for="feature in category.features" :key="feature.id">
-                                <InputLabel :for="feature.id">
+                                <InputLabel :for="`feature-${feature.id}`">
                                     <Checkbox 
-                                        :id="feature.id" 
+                                        :id="`feature-${feature.id}`" 
                                         :checked="isFeatureSelected(feature.id)"
                                         @change="toggleFeature(feature.id)"
                                     />
@@ -137,7 +115,7 @@ const save = () => {
         </template>
         <template #footer>
             <PrimaryButton :loading="loading" @click="save">
-                Set up Features
+                Set up Images
             </PrimaryButton>
         </template>
     </EditCarLayout>
