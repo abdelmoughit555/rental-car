@@ -2,13 +2,19 @@
 
 use App\Http\Controllers\Cars\CarCreationController;
 use App\Http\Controllers\Cars\CarEditorController;
+use Inertia\Inertia;
 use App\Http\Controllers\Storage\S3PresignController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
     ]);
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', function () {
+        return Inertia::render('Auth/Login');
+    })->name('login');
 });
 
 Route::post('/s3/presign', S3PresignController::class)->name('storage.s3.presign');
