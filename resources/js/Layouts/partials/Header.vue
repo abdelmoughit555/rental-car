@@ -132,11 +132,6 @@ const logout = () => {
                                                 Profile
                                             </DropdownMenuItem>
                                         </Link>
-                                        <Link :href="route('dashboard')">
-                                            <DropdownMenuItem class="cursor-pointer">
-                                                Dashboard
-                                            </DropdownMenuItem>
-                                        </Link>
                                     </DropdownMenuGroup>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem @click="logout" class="cursor-pointer">
@@ -147,17 +142,15 @@ const logout = () => {
                             </DropdownMenu>
                         </div>
                         
-                        <!-- Guest Login Button -->
-                        <Button v-else @click="status = true" variant="default" class="flex items-center space-x-2">
+                        <Link v-else :href="route('login')" as="button" method="get" class="inline-flex items-center space-x-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">
                             <User class="h-4 w-4" />
                             <span class="text-sm font-medium">Login</span>
-                        </Button>
+                        </Link>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Login Modal - Only show for guests -->
     <LoginModal v-if="!$page.props.auth.user" :show="status" @close="status = false" />
 </template>
