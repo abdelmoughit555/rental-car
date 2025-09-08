@@ -13,15 +13,12 @@ const props = defineProps({
 
 const brands = usePage().props.makes;
 
-const carModels = ref([]);
+const carModels = ref(usePage().props.carModels);
 
 watch(() => props.car.brand_id, (value) => {
-    if (value) {
-        carModels.value = usePage().props.carModels.filter(model => model.make_id === value)
-    } else {
-        carModels.value = []
-        props.car.car_model_id = null;
-    }
+    props.car.car_model_id = null
+    carModels.value = value ? usePage().props.carModels.filter(m => m.make_id === value)
+    : []
 });
 
 const watchedFields = ['brand_id', 'car_model_id']
@@ -58,7 +55,7 @@ const hasSectionError = computed(() => sectionErrors.value.length > 0)
                     </SelectInput>
                 </div>
                 <div>
-                    <SelectInput class="w-full lg:w-auto" name="type" id="label" v-model="car.car_model_id"
+                    <SelectInput :disabled="car.brand_id == null" class="w-full lg:w-auto" name="type" id="brand_id" v-model="car.car_model_id"
                     :items="[{
                         id: null,
                         name: 'Select a Model',

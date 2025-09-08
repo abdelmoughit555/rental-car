@@ -5,6 +5,7 @@ namespace App\Models\Cars;
 use App\Enums\Cars\CarStatus;
 use App\Models\User;
 use App\Models\Brands\CarModel;
+use App\Models\Brands\Make;
 use App\Models\CarFeatures\Feature;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
@@ -41,10 +42,16 @@ class Car extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Make::class);
+    }
+
     public function carModel(): BelongsTo
     {
         return $this->belongsTo(CarModel::class);
     }
+    
 
     public function fuelType(): BelongsTo
     {
