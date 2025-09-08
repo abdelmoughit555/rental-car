@@ -18,9 +18,7 @@ class CarController extends Controller
     {
         $car = $action->execute(
             car: $car,
-            attributes: $request->validated(),
-            features: $request->input('features', []),
-            images: $request->input('images', [])
+            attributes: $request->validated()
         );
 
         CarUpdated::dispatch($car->id);

@@ -578,7 +578,6 @@ class CarControllerTest extends TestCase
         $user = $this->signIn();
         $car = Car::factory()->create(['user_id' => $user->id]);
         
-        // Create some features
         $feature1 = Feature::factory()->create();
         $feature2 = Feature::factory()->create();
         $feature3 = Feature::factory()->create();

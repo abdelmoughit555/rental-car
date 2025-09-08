@@ -10,32 +10,32 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateCarAction
 {
-    public function execute(Car $car, array $attributes, array $features = [], array $images = []): Car
+    public function execute(Car $car, array $attributes): Car
     {
-        DB::transaction(function () use ($car, $attributes, $features, $images) {
+        DB::transaction(function () use ($car, $attributes) {
             $car->update(Arr::except($attributes, ['features', 'images']));
 
-            $this->syncFeaturesIfPresent($car, $attributes, $features);
-            $this->syncImagesIfPresent($car, $images);
+            $this->syncFeaturesIfPresent($car, $attributes);
+            $this->syncImagesIfPresent($car, $attributes);
         });
 
         return $car->fresh();
     }
 
-    private function syncFeaturesIfPresent(Car $car, array $attributes, ?array $features): void
+    private function syncFeaturesIfPresent(Car $car, array $attributes): void
     {
         if (array_key_exists('features', $attributes)) {
-            $car->features()->sync($features ?? []);
+            $car->features()->sync($attributes['features'] ?? []);
         }
     }
 
-    private function syncImagesIfPresent(Car $car, ?array $images): void
+    private function syncImagesIfPresent(Car $car, array $attributes): void
     {
-        if (empty($images)) {
+        if (empty($attributes['images'])) {
             return;
         }
 
-        foreach ($images as $section => $sectionImages) {
+        foreach ($attributes['images'] as $section => $sectionImages) {
             $directory = "car_images/{$section}";
 
             $existingMedia = $car->media()->where('directory', $directory)->get();
