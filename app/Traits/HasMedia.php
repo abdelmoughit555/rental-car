@@ -31,4 +31,15 @@ trait HasMedia
 
         return $media;
     }
+
+    public function featureImages()
+    {
+    }
+
+    public function frontViewImage()
+    {
+        return $this->morphOne(Media::class, 'model')
+            ->where('directory', 'car_images/front_view')
+            ->orderBy('id', 'asc');
+    }
 }
