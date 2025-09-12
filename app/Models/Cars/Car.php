@@ -9,15 +9,17 @@ use App\Models\Brands\Make;
 use App\Models\CarFeatures\Feature;
 use App\Models\Cars\FuelType;
 use App\Models\Cars\Gearbox;
+use App\Traits\Filterable;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 class Car extends Model
 {
     /** @use HasFactory<\Database\Factories\Cars\CarFactory> */
-    use HasFactory, HasMedia;
+    use HasFactory, HasMedia, Filterable;
 
     protected $fillable = ['title', 'description', 'year', 'engine_cc', 'power_hp', 'doors', 'seats', 'mileage_km', 'registration_number', 'status', 'published_at', 'hidden_at', 'user_id', 'brand_id', 'car_model_id', 'fuel_type_id', 'gearbox_id', 'available_from', 'available_to', 'price_per_day'
     ];
@@ -36,6 +38,14 @@ class Car extends Model
         'mileage_km' => 'integer',
         'price_per_day' => 'decimal:2',
     ];
+
+    /**
+     * Scope a query to only include active cars.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', CarStatus::ACTIVE);
+    }
 
     public function user(): BelongsTo
     {

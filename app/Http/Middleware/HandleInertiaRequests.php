@@ -44,8 +44,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'cities' => $this->fetchCities(),
             'areas' => $this->fetchAreas(),
-            'makes' => $this->fetchMakes(),
-            'carModels' => $this->fetchModels(),
+            'makes' => $this->fetchMakes(), // all makes
+            'carModels' => $this->fetchModels(), // all models
             'gearboxes' => $this->fetchGearboxes(),
             'fuelTypes' => $this->fetchFuelTypes(),
             'featureCategories' => $this->fetchFeatureCategories(),
@@ -90,10 +90,11 @@ class HandleInertiaRequests extends Middleware
      */
     public function fetchMakes()
     {
-        return Cache::remember('makes', now()->addHour(), function () {
-            return Make::active()
+        return Cache::remember('makes_all', now()->addHour(), function () {
+            return Make::query()
                 ->orderByDesc('featured')
-                ->get(['id', 'name', 'slug']);
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'featured']);
         });
     }
 
@@ -102,8 +103,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function fetchModels()
     {
-        return Cache::remember('models', now()->addHour(), function () {
-            return CarModel::active()->with('make:id,name,slug')
+        return Cache::remember('models_all', now()->addHour(), function () {
+            return CarModel::query()->with('make:id,name,slug')
                 ->orderBy('name')
                 ->get(['id', 'name', 'slug', 'make_id']);
         });
